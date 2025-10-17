@@ -20,6 +20,14 @@ Anomaly Hunter autonomously detects and investigates data anomalies using 3 spec
 
 **Result:** Real-time anomaly detection with confidence-scored root cause analysis.
 
+### ✅ Validated Performance
+- **75.2% Precision** - High accuracy when flagging anomalies
+- **1.7% False Positive Rate** - Won't flood your team with false alarms
+- **7/7 Scenarios Detected** - Validated on realistic production data
+- **Automated Evaluation** - Built-in quality metrics and testing
+
+See [VALIDATION_REPORT.md](VALIDATION_REPORT.md) for full test results.
+
 ---
 
 ## 🚀 Quick Start
