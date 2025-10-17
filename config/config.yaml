@@ -1,0 +1,450 @@
+# TRUE MULTI-MODEL CONFIGURATION
+# Each agent tests multiple models and learns which performs best
+# Based on October 2025 evaluation benchmarks:
+# - GPT-5: 74.9% SWE-bench (best overall)
+# - Claude 4.5 Sonnet: Highest pass@5 (55.1%), catches unique bugs
+# - Qwen 2.5 Coder 32B: Best open-source, matches GPT-4o
+# - DeepSeek V3: Cost-effective (85% perf at 10% cost)
+# - DeepSeek R1: AVOID for code (reliability issues, use V3 instead)
+
+# ACTUAL Models Available on OpenRouter (as of Oct 11, 2025)
+available_models:
+  openai:
+    - openai/gpt-5  # Latest GPT model (July 2025)
+    - openai/gpt-5-pro  # Professional version (July 2025)
+    - openai/o4-mini-high  # Latest reasoning (Sept 2025)
+    - openai/o4-mini  # Fast reasoning (Sept 2025)
+    - openai/o3-pro  # Advanced reasoning (June 2025)
+    - openai/o3  # Strong reasoning (June 2025)
+    - openai/o3-mini-high  # Enhanced mini (June 2025)
+    - openai/o3-mini  # Fast reasoning (June 2025)
+    - openai/o1-pro  # Pro reasoning (March 2025)
+    - openai/o1  # Superior reasoning (Sept 2024)
+    - openai/o1-mini  # Fast reasoning (Sept 2024)
+    - openai/gpt-4o  # GPT-4 optimized (May-Aug 2024)
+    - openai/gpt-4o-mini  # Faster, cheaper (July 2024)
+  anthropic:
+    - anthropic/claude-sonnet-4.5  # Latest Sonnet (Sept 2025)
+    - anthropic/claude-opus-4.1  # Latest Opus (June 2025)
+    - anthropic/claude-4-opus  # Claude 4 Opus (May 2025)
+    - anthropic/claude-4-sonnet  # Claude 4 Sonnet (May 2025)
+    - anthropic/claude-3-7-sonnet  # Enhanced Sonnet (Feb 2025)
+    - anthropic/claude-3-5-sonnet  # Previous Sonnet (June 2024)
+    - anthropic/claude-3-opus  # Claude 3 Opus (March 2024)
+    - anthropic/claude-3-haiku  # Fast and cheap (March 2024)
+  google:
+    - google/gemini-2.5-pro-exp  # Latest Pro (March 2025)
+    - google/gemini-2.5-flash-exp  # Latest Flash (March 2025)
+    - google/gemini-2.0-pro-exp  # 1M context window (Dec 2024)
+    - google/gemini-1.5-pro  # Production (Feb 2024)
+    - google/gemini-1.5-flash  # Fast version (May 2024)
+  deepseek:
+    - deepseek/deepseek-chat  # DeepSeek V3.1 (Jan 2025) - SOTA code generation
+    - deepseek/deepseek-v3.2-exp  # Experimental V3.2 (Jan 2025)
+    - deepseek/deepseek-chat-v3.1  # Chat V3.1 (Jan 2025)
+  alibaba:
+    - alibaba/qwen2.5-coder-32b-instruct  # Best open-source, matches GPT-4o (Nov 2024)
+    - alibaba/qwen2.5-coder-7b-instruct  # Lightweight champion (Nov 2024)
+    - alibaba/qwen2.5-72b-instruct  # General model (Sept 2024)
+    - alibaba/qwq-32b-preview  # Reasoning specialist (Nov 2024)
+  meta_llama:
+    - meta-llama/llama-3.3-70b-instruct  # Latest Llama (Jan 2025)
+    - meta-llama/llama-3.2-90b-instruct  # Large model (Sept 2024)
+    - meta-llama/llama-3.1-70b-instruct  # Previous 70B (July 2024)
+    - meta-llama/llama-3.1-8b-instruct  # Smaller (July 2024)
+  mistral:
+    - mistralai/codestral-25.01  # 95.3% success, 80+ languages (Jan 2025)
+    - mistralai/mistral-small-3  # Competes with 70B models (2025)
+    - mistralai/mistral-large-2  # Large model (July 2024)
+    - mistralai/mixtral-8x22b-instruct  # Large MoE (April 2024)
+    - mistralai/mixtral-8x7b-instruct  # MoE (Dec 2023)
+  nvidia:
+    - nvidia/llama-3.3-nemotron-70b-instruct  # Enhanced Llama (Jan 2025)
+    - nvidia/llama-3.1-nemotron-70b-instruct  # Previous version (July 2024)
+  xai:
+    - xai/grok-2-vision  # Multi-modal (Dec 2024)
+    - xai/grok-2  # Base model (Aug 2024)
+  perplexity:
+    - perplexity/r1  # Latest reasoning model (July 2025)
+    - perplexity/sonar-pro  # Pro search (July 2024)
+    - perplexity/llama-3.1-sonar-huge-128k-online  # Huge context (July 2024)
+  baseten:
+    - baseten/deepseek-r1-distill-llama-70b  # Distilled (Jan 2025)
+    - baseten/deepseek-r1-distill-qwen-32b  # Distilled (Jan 2025)
+  ibm:
+    - ibm/granite-3.3-70b-instruct  # Latest Granite (May 2025)
+    - ibm/granite-3.3-8b-instruct  # Outperforms 2x size (May 2025)
+    - ibm/granite-3.2-8b-instruct  # Beats Llama 3.1, Qwen 2.5 (Feb 2025)
+    - ibm/granite-code-34b-instruct  # Code specialist
+    - ibm/granite-code-8b-instruct  # Lightweight code
+  microsoft:
+    - microsoft/phi-4  # Best tiny model (Dec 2024)
+    - microsoft/phi-3.5-mini-instruct  # 128K context (Aug 2024)
+  google:
+    - google/gemma-3-27b  # Largest Gemma (2025)
+    - google/gemma-3-12b  # Mid-size (2025)
+    - google/gemma-3-4b  # Lightweight (2025)
+  stability:
+    - stability-ai/stablelm-2-12b  # Latest StableLM
+    - stability-ai/stablelm-1.6b  # Ultra-light
+  cohere:
+    - cohere/command-r-plus  # Large model
+    - cohere/command-r  # Efficient version
+  01ai:
+    - 01-ai/yi-34b  # Bilingual, beats Llama 2 70B
+    - 01-ai/yi-coder  # Code specialist
+
+# Lightweight Models for Edge/Resource-Constrained Deployment
+lightweight_models:
+  coding:
+    - alibaba/qwen2.5-coder-7b-instruct  # Best small coder
+    - ibm/granite-code-8b-instruct  # Outperforms 2x size
+    - microsoft/phi-4  # Microsoft's efficient design
+  general:
+    - google/gemma-3-4b  # Google quality, tiny size
+    - stability-ai/stablelm-1.6b  # Ultra-light
+    - meta-llama/llama-3.1-8b-instruct  # Meta's lightweight
+
+# Agent Configuration - Multi-Model Selection
+agents:
+  architect:
+    # Models this agent can choose from (learns which is best)
+    candidate_models:
+      - openai/gpt-5-pro  # 94.6% AIME, best reasoning (July 2025)
+      - google/gemini-2.5-pro-exp  # 2M+ tokens for large systems (March 2025)
+      - openai/o4-mini-high  # Latest reasoning (Sept 2025)
+      - anthropic/claude-opus-4.1  # 78% AIME, trusted safety (June 2025)
+      - openai/o3-pro  # Deliberate reasoning steps (June 2025)
+    # Model selected dynamically from model_strategy_config.yaml based on current strategy
+    # Model selection strategy
+    model_selection: "thompson_sampling"  # or "epsilon_greedy", "ucb"
+    temperature: 0.7
+    max_tokens: 2000
+    expertise:
+      - system_design
+      - architecture
+      - planning
+      - scalability
+    personality: "You are a senior system architect with 15+ years of experience designing large-scale systems."
+
+  coder:
+    candidate_models:
+      # Closed-source leaders
+      - openai/gpt-5  # 74.9% SWE-bench, best overall (July 2025)
+      - anthropic/claude-3-7-sonnet  # Complex workflows specialist (Feb 2025)
+      # Open-source champions
+      - qwen/qwen3-coder-plus  # Latest Qwen coding model (2025)
+      - deepseek/deepseek-chat  # DeepSeek V3.1 (Jan 2025) - ACTUAL OpenRouter ID
+      - mistralai/codestral-2501  # Codestral 25.01 (Jan 2025) - ACTUAL OpenRouter ID
+      - meta-llama/llama-3.3-70b-instruct  # Meta's latest (Jan 2025)
+    # Model selected dynamically from model_strategy_config.yaml based on current strategy
+    model_selection: "thompson_sampling"
+    temperature: 0.5
+    max_tokens: 3000
+    expertise:
+      - implementation
+      - debugging
+      - optimization
+      - algorithms
+    personality: "You are an expert software engineer who writes clean, efficient, and well-tested code."
+
+  reviewer:
+    candidate_models:
+      - anthropic/claude-sonnet-4.5  # Highest pass@5, catches unique bugs (Sept 2025)
+      - openai/gpt-5  # 22% fewer errors with reasoning (July 2025)
+      - openai/o3-pro  # Step-by-step analysis (June 2025)
+      - anthropic/claude-opus-4.1  # Safety and reliability (June 2025)
+      - openai/o3  # Strong bug detection (June 2025)
+    # Model selected dynamically from model_strategy_config.yaml based on current strategy
+    model_selection: "thompson_sampling"
+    temperature: 0.3
+    max_tokens: 1500
+    expertise:
+      - code_review
+      - testing
+      - quality
+      - security
+    personality: "You are a meticulous code reviewer who catches bugs and ensures best practices."
+
+  documenter:
+    candidate_models:
+      # Mixed closed and open
+      - anthropic/claude-3-7-sonnet  # Best for documentation (Feb 2025)
+      - google/gemini-2.5-flash-exp  # Fast generation (March 2025)
+      # Open-source options
+      - meta-llama/llama-3.3-70b-instruct  # Strong open option (Jan 2025)
+      - mistralai/mistral-small-3  # Efficient, competes with 70B (2025)
+      - google/gemma-3-12b  # Google quality, lightweight (2025)
+    # Model selected dynamically from model_strategy_config.yaml based on current strategy
+    model_selection: "thompson_sampling"
+    temperature: 0.6
+    max_tokens: 2500
+    expertise:
+      - documentation
+      - examples
+      - tutorials
+      - api_docs
+    personality: "You are a technical writer who creates clear, comprehensive documentation."
+
+  researcher:
+    candidate_models:
+      - google/gemini-2.5-flash  # Latest Gemini with large context (2025)
+      - google/gemma-3-27b-it  # Largest Gemma model (2025)
+      - openai/gpt-5-pro  # Advanced research capabilities (July 2025)
+      - anthropic/claude-opus-4.1  # Thorough research (June 2025)
+      - meta-llama/llama-3.3-70b-instruct  # Strong open-source option (Jan 2025)
+    # Model selected dynamically from model_strategy_config.yaml based on current strategy
+    model_selection: "thompson_sampling"
+    temperature: 0.8
+    max_tokens: 2000
+    expertise:
+      - research
+      - analysis
+      - data
+      - trends
+    personality: "You are a research analyst who finds relevant information and best practices."
+
+# Model Performance Tracking
+model_learning:
+  # Track performance per model per task type
+  track_metrics:
+    - quality_score
+    - latency
+    - cost
+    - error_rate
+    - consensus_agreement
+
+  # How to select models
+  selection_strategies:
+    thompson_sampling:
+      # Bayesian approach - balances exploration/exploitation
+      alpha: 1.0
+      beta: 1.0
+    epsilon_greedy:
+      # Simple exploration strategy
+      epsilon: 0.1
+      decay: 0.95
+    ucb:
+      # Upper Confidence Bound
+      c: 2.0
+
+  # Model rotation settings
+  exploration_phase_generations: 3  # Try all models first
+  exploitation_start: 4  # Start using best performers
+
+# Consensus Methods Configuration
+consensus:
+  voting:
+    min_agreement: 0.6
+    weight_by_expertise: false
+
+  weighted_voting:
+    min_agreement: 0.5
+    expertise_weight: 0.7
+    history_weight: 0.3
+
+  debate:
+    max_rounds: 5
+    agreement_threshold: 0.8
+    moderator_agent: architect
+
+  synthesis:
+    synthesizer_agent: architect
+    include_all_perspectives: true
+
+  hierarchy:
+    task_expert_mapping:
+      architecture: architect
+      coding: coder
+      review: reviewer
+      documentation: documenter
+      research: researcher
+
+# Learning Configuration
+learning:
+  # How much new experiences affect learned patterns
+  learning_rate: 0.3
+
+  # Exploration vs exploitation
+  exploration_rate: 0.2
+  exploration_decay: 0.95
+
+  # Memory settings
+  max_history: 1000
+  pattern_confidence_threshold: 0.7
+
+  # Performance thresholds
+  success_threshold: 0.7
+  failure_threshold: 0.3
+
+# Task Classification
+task_classification:
+  keywords:
+    architecture:
+      - design
+      - architect
+      - structure
+      - system
+      - scalability
+      - microservices
+
+    coding:
+      - implement
+      - build
+      - code
+      - function
+      - api
+      - feature
+
+    review:
+      - review
+      - audit
+      - check
+      - test
+      - quality
+      - security
+
+    documentation:
+      - document
+      - write
+      - explain
+      - readme
+      - tutorial
+      - guide
+
+    research:
+      - research
+      - analyze
+      - investigate
+      - compare
+      - evaluate
+      - study
+
+# Execution Settings
+execution:
+  # Timeouts in seconds
+  agent_timeout: 30
+  consensus_timeout: 60
+
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 2
+
+  # Concurrency
+  max_concurrent_agents: 5
+
+  # Rate limiting
+  requests_per_minute: 60
+
+# Weave Configuration
+weave:
+  project_name: weavehacks-collaborative
+  log_level: INFO
+  track_metrics:
+    - quality
+    - efficiency
+    - harmony
+    - cost
+    - consensus_time
+    - conflicts_resolved
+    - model_performance  # NEW: Track which model performed best
+
+  # What to track
+  track_individual_outputs: true
+  track_consensus_process: true
+  track_learning_updates: true
+  track_model_selection: true  # NEW: Track model selection learning
+
+# Demo Configuration
+demo:
+  generations: 10
+  tasks_per_generation: 25
+  show_improvement_every: 3
+  visual_mode: rich  # or 'simple'
+  show_model_learning: true  # NEW: Display model performance learning
+
+  # Test scenarios
+  test_scenarios:
+    - "Build a REST API with authentication"
+    - "Design a microservices architecture"
+    - "Review code for security issues"
+    - "Write API documentation"
+    - "Research database scaling strategies"
+# =============================================================================
+# FALLBACK CONFIGURATION
+# Controls how the system handles model failures during execution
+# =============================================================================
+fallback:
+  # Mode: "interactive", "auto", or "strict"
+  # - interactive: Prompt user when models fail (DEFAULT - recommended for first-time users)
+  # - auto: Automatically try fallback models based on smart rules
+  # - strict: Never use fallback models, fail immediately
+  # 
+  # Leave commented out for interactive mode (system will prompt on first use)
+  # mode: "interactive"
+  
+  # Auto-escalation rules (used when mode = "auto")
+  auto_rules:
+    # Try other models in same tier first before escalating
+    try_same_tier_first: true
+    
+    # Maximum tier jump allowed (1 = can only go up one tier)
+    # e.g., Tier 3 → Tier 2 allowed, but Tier 3 → Tier 1 blocked
+    max_tier_jump: 1
+    
+    # Error-specific rules
+    on_rate_limit: "try_next_in_tier"  # Try another model in same tier
+    on_api_error: "escalate_one_tier"  # Jump to next tier up
+    on_timeout: "try_faster_model"  # Use faster model
+    on_invalid_model: "escalate_one_tier"  # Jump to validated tier
+  
+  # Budget protection
+  budget:
+    # Maximum cost per single request ($)
+    max_single_request: 1.00
+    
+    # Maximum total cost per session ($)
+    session_limit: 50.00
+    
+    # Prompt user if a request would exceed limits
+    prompt_on_exceed: true
+    
+    # Hard stop if session limit reached (vs prompting)
+    hard_stop_at_limit: false
+  
+  # User experience
+  ux:
+    # Show cost estimates in prompts
+    show_cost_estimates: true
+    
+    # Show model tier information
+    show_tier_info: true
+    
+    # Suggest saving preference after first interactive choice
+    suggest_config_save: true
+    
+    # Remember user's fallback choices within session
+    learn_preferences: true
+
+# Example configurations for different use cases:
+#
+# BUDGET-CONSCIOUS USER:
+# fallback:
+#   mode: "auto"
+#   auto_rules:
+#     try_same_tier_first: true
+#     max_tier_jump: 0  # Never escalate tiers
+#   budget:
+#     session_limit: 10.00
+#
+# QUALITY-FOCUSED USER:
+# fallback:
+#   mode: "auto"
+#   auto_rules:
+#     max_tier_jump: 2  # Allow escalation to premium
+#   budget:
+#     session_limit: 100.00
+#
+# HANDS-ON USER:
+# fallback:
+#   mode: "interactive"  # Always ask before switching models

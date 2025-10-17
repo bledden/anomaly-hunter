@@ -1,0 +1,46 @@
+# PREMIUM CLOSED-SOURCE CONFIGURATION
+# Top-tier models only: GPT-5, Claude 4.5 Sonnet, O4-Mini, Gemini 2.5 Pro
+# For high-stakes production benchmarking
+
+agents:
+  architect:
+    default_model: openai/gpt-5-pro  # 94.6% AIME, best reasoning
+    temperature: 0.7
+    max_tokens: 2000
+
+  coder:
+    default_model: openai/gpt-5  # 74.9% SWE-bench, best overall
+    temperature: 0.5
+    max_tokens: 3000
+
+  reviewer:
+    default_model: anthropic/claude-sonnet-4.5  # Highest pass@5, catches unique bugs
+    temperature: 0.3
+    max_tokens: 1500
+
+  documenter:
+    default_model: anthropic/claude-3-7-sonnet  # Best for documentation
+    temperature: 0.6
+    max_tokens: 2500
+
+  researcher:
+    default_model: google/gemini-2.5-pro-exp  # 2M+ context, latest
+    temperature: 0.8
+    max_tokens: 2000
+
+# Execution Settings
+execution:
+  agent_timeout: 60  # Longer timeout for premium models
+  max_retries: 3
+  max_concurrent_agents: 5
+
+# Weave Configuration
+weave:
+  project_name: weavehacks-premium-benchmark
+  log_level: INFO
+  track_metrics:
+    - quality
+    - efficiency
+    - cost
+    - model_performance
+  track_individual_outputs: true

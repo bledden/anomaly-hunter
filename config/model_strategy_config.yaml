@@ -1,0 +1,277 @@
+# Model Selection Strategy Configuration
+# Users can choose their priority: QUALITY, COST, or BALANCED
+
+# User can set their preference here
+user_preference: BALANCED  # Options: QUALITY_FIRST, COST_FIRST, BALANCED
+
+# Define strategies with clear trade-offs
+strategies:
+  QUALITY_FIRST:
+    name: "Maximum Quality"
+    description: "Use the best models regardless of cost. Ideal for production-critical code."
+    cost_weight: 0.1
+    quality_weight: 0.9
+    speed_weight: 0.0
+
+    model_preferences:
+      architect:
+        primary: ["openai/gpt-5-pro", "openai/o4-mini-high", "google/gemini-2.5-pro-exp"]
+        fallback: ["anthropic/claude-opus-4.1", "openai/o3-pro"]
+        never_use: []  # Will use any model if needed
+
+      coder:
+        primary: ["anthropic/claude-sonnet-4.5", "openai/gpt-5", "anthropic/claude-4-opus"]
+        fallback: ["anthropic/claude-3-7-sonnet"]
+        never_use: []
+
+      reviewer:
+        primary: ["anthropic/claude-sonnet-4.5", "openai/gpt-5", "openai/o3-pro"]
+        fallback: ["anthropic/claude-opus-4.1"]
+        never_use: []
+
+      documenter:
+        primary: ["anthropic/claude-3-7-sonnet", "openai/gpt-5"]
+        fallback: ["google/gemini-2.5-flash-exp"]
+        never_use: []
+
+      researcher:
+        primary: ["google/gemini-2.5-pro-exp", "openai/gpt-5-pro", "perplexity/r1"]
+        fallback: ["anthropic/claude-opus-4.1"]
+        never_use: []
+
+    thresholds:
+      min_quality_score: 0.90  # Only use models with 90%+ benchmark scores
+      max_acceptable_latency: 30  # seconds
+      escalation_threshold: 0.95  # Escalate if confidence < 95%
+
+  COST_FIRST:
+    name: "Maximum Cost Efficiency"
+    description: "Prioritize free open-source models. Perfect for high-volume or budget-conscious projects."
+    cost_weight: 0.9
+    quality_weight: 0.1
+    speed_weight: 0.0
+
+    model_preferences:
+      architect:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "alibaba/qwq-32b-preview"]
+        fallback: ["deepseek-ai/deepseek-v3", "mistralai/mistral-small-3"]
+        never_use: ["openai/gpt-5-pro", "anthropic/claude-opus-4.1"]  # Too expensive
+
+      coder:
+        primary: ["alibaba/qwen2.5-coder-32b-instruct", "deepseek-ai/deepseek-v3"]
+        fallback: ["mistralai/codestral-25.01", "meta-llama/llama-3.3-70b-instruct"]
+        never_use: ["openai/gpt-5", "anthropic/claude-4-opus"]
+
+      reviewer:
+        primary: ["deepseek-ai/deepseek-v3", "meta-llama/llama-3.3-70b-instruct"]
+        fallback: ["alibaba/qwen2.5-72b-instruct", "mistralai/mistral-small-3"]
+        never_use: ["openai/o3-pro", "anthropic/claude-sonnet-4.5"]
+
+      documenter:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "google/gemma-3-12b"]
+        fallback: ["mistralai/mistral-small-3", "stability-ai/stablelm-2-12b"]
+        never_use: ["anthropic/claude-3-7-sonnet", "openai/gpt-5"]
+
+      researcher:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "01-ai/yi-34b"]
+        fallback: ["cohere/command-r", "deepseek-ai/deepseek-v3"]
+        never_use: ["google/gemini-2.5-pro-exp", "openai/gpt-5-pro"]
+
+    thresholds:
+      min_quality_score: 0.70  # Accept 70%+ quality for cost savings
+      max_acceptable_latency: 60  # seconds (can wait longer for free)
+      escalation_threshold: 0.60  # Only escalate if confidence < 60%
+
+  BALANCED:
+    name: "Balanced Performance"
+    description: "Smart mix of open and closed models. Best value for most use cases."
+    cost_weight: 0.5
+    quality_weight: 0.4
+    speed_weight: 0.1
+
+    model_preferences:
+      architect:
+        primary: ["alibaba/qwen2.5-72b-instruct", "meta-llama/llama-3.3-70b-instruct"]
+        fallback: ["openai/gpt-5-pro", "google/gemini-2.5-pro-exp"]
+        never_use: []  # Flexible based on task
+
+      coder:
+        primary: ["alibaba/qwen2.5-coder-32b-instruct", "deepseek-ai/deepseek-v3"]
+        fallback: ["anthropic/claude-3-7-sonnet", "openai/gpt-5"]
+        never_use: []
+
+      reviewer:
+        primary: ["deepseek-ai/deepseek-v3", "meta-llama/llama-3.3-70b-instruct"]
+        fallback: ["anthropic/claude-sonnet-4.5", "openai/o3"]
+        never_use: []
+
+      documenter:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "mistralai/mistral-small-3"]
+        fallback: ["anthropic/claude-3-7-sonnet", "google/gemini-2.5-flash-exp"]
+        never_use: []
+
+      researcher:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "deepseek-ai/deepseek-v3"]
+        fallback: ["google/gemini-2.5-pro-exp", "perplexity/r1"]
+        never_use: []
+
+    thresholds:
+      min_quality_score: 0.80  # Require 80%+ quality
+      max_acceptable_latency: 45  # seconds
+      escalation_threshold: 0.75  # Escalate if confidence < 75%
+
+  SPEED_FIRST:
+    name: "Maximum Speed"
+    description: "Fastest response times. Ideal for real-time applications."
+    cost_weight: 0.2
+    quality_weight: 0.3
+    speed_weight: 0.5
+
+    model_preferences:
+      architect:
+        primary: ["google/gemini-2.5-flash-exp", "mistralai/mistral-small-3"]
+        fallback: ["alibaba/qwen2.5-coder-7b-instruct", "microsoft/phi-4"]
+        never_use: ["openai/gpt-5-pro", "google/gemini-2.5-pro-exp"]  # Too slow
+
+      coder:
+        primary: ["alibaba/qwen2.5-coder-7b-instruct", "ibm/granite-code-8b-instruct"]
+        fallback: ["microsoft/phi-4", "google/gemma-3-4b"]
+        never_use: ["openai/gpt-5", "deepseek-ai/deepseek-v3"]  # 671B too large
+
+      reviewer:
+        primary: ["mistralai/mistral-small-3", "google/gemma-3-12b"]
+        fallback: ["ibm/granite-3.2-8b-instruct", "stability-ai/stablelm-2-12b"]
+        never_use: ["anthropic/claude-sonnet-4.5", "openai/o3-pro"]
+
+      documenter:
+        primary: ["google/gemma-3-4b", "stability-ai/stablelm-1.6b"]
+        fallback: ["microsoft/phi-4", "meta-llama/llama-3.1-8b-instruct"]
+        never_use: ["anthropic/claude-3-7-sonnet", "meta-llama/llama-3.3-70b-instruct"]
+
+      researcher:
+        primary: ["google/gemma-3-12b", "mistralai/mistral-small-3"]
+        fallback: ["cohere/command-r", "01-ai/yi-coder"]
+        never_use: ["google/gemini-2.5-pro-exp", "perplexity/r1"]
+
+    thresholds:
+      min_quality_score: 0.60  # Accept lower quality for speed
+      max_acceptable_latency: 5  # seconds (must be fast!)
+      escalation_threshold: 0.50  # Rarely escalate
+
+  PRIVACY_FIRST:
+    name: "Maximum Privacy"
+    description: "Only use open-source models that can run locally. Zero data leakage."
+    cost_weight: 0.3
+    quality_weight: 0.5
+    speed_weight: 0.2
+
+    model_preferences:
+      architect:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "alibaba/qwen2.5-72b-instruct"]
+        fallback: ["deepseek-ai/deepseek-v3", "01-ai/yi-34b"]
+        never_use: ["openai/*", "anthropic/*", "google/*", "perplexity/*"]  # No cloud APIs
+
+      coder:
+        primary: ["alibaba/qwen2.5-coder-32b-instruct", "deepseek-ai/deepseek-v3"]
+        fallback: ["mistralai/codestral-25.01", "ibm/granite-code-34b-instruct"]
+        never_use: ["openai/*", "anthropic/*", "google/*"]
+
+      reviewer:
+        primary: ["deepseek-ai/deepseek-v3", "meta-llama/llama-3.3-70b-instruct"]
+        fallback: ["alibaba/qwen2.5-72b-instruct", "mistralai/mixtral-8x22b-instruct"]
+        never_use: ["openai/*", "anthropic/*", "google/*"]
+
+      documenter:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "mistralai/mistral-small-3"]
+        fallback: ["stability-ai/stablelm-2-12b", "cohere/command-r"]
+        never_use: ["openai/*", "anthropic/*", "google/*"]
+
+      researcher:
+        primary: ["meta-llama/llama-3.3-70b-instruct", "01-ai/yi-34b"]
+        fallback: ["cohere/command-r-plus", "deepseek-ai/deepseek-v3"]
+        never_use: ["openai/*", "anthropic/*", "google/*", "perplexity/*"]
+
+    thresholds:
+      min_quality_score: 0.75  # Good quality from open models
+      max_acceptable_latency: 90  # Can be slower if running locally
+      escalation_threshold: 0.00  # Never escalate to cloud
+
+# Dynamic adjustment rules
+dynamic_rules:
+  # Automatically switch strategies based on context
+  auto_switch:
+    enabled: true
+    rules:
+      - condition: "task_complexity > 0.9"
+        switch_to: QUALITY_FIRST
+      - condition: "remaining_budget < 100"
+        switch_to: COST_FIRST
+      - condition: "user_waiting_time > 30"
+        switch_to: SPEED_FIRST
+      - condition: "sensitive_data == true"
+        switch_to: PRIVACY_FIRST
+
+  # Learn from performance
+  learning:
+    enabled: true
+    track_metrics:
+      - task_success_rate
+      - user_satisfaction
+      - cost_per_task
+      - time_to_completion
+
+    adjust_weights_after: 100  # tasks
+    max_weight_change: 0.1  # per adjustment
+
+# Cost tracking
+cost_tracking:
+  budget_limits:
+    daily: 100.00  # USD
+    monthly: 2000.00  # USD
+    per_task: 5.00  # USD
+
+  model_costs:  # Per million tokens (input/output)
+    "openai/gpt-5": [30, 60]
+    "openai/gpt-5-pro": [40, 80]
+    "openai/o4-mini-high": [35, 70]
+    "openai/o3-pro": [25, 50]
+    "anthropic/claude-sonnet-4.5": [3, 15]
+    "anthropic/claude-opus-4.1": [15, 75]
+    "anthropic/claude-4-opus": [12, 60]
+    "google/gemini-2.5-pro-exp": [10, 30]
+    "google/gemini-2.5-flash-exp": [2, 8]
+    # Open source models
+    "alibaba/qwen2.5-coder-32b-instruct": [0, 0]
+    "deepseek-ai/deepseek-v3": [0, 0]
+    "meta-llama/llama-3.3-70b-instruct": [0, 0]
+    "mistralai/codestral-25.01": [0, 0]
+    # ... all open source are free
+
+# Performance benchmarks for reference
+model_benchmarks:
+  # SWE-bench scores
+  "anthropic/claude-sonnet-4.5": 77.2
+  "openai/gpt-5": 74.9
+  "anthropic/claude-opus-4.1": 74.5
+  "deepseek-ai/deepseek-v3": 42.0
+  "alibaba/qwen2.5-coder-32b-instruct": 38.0
+
+  # HumanEval scores
+  "deepseek-ai/deepseek-v3": 82.6
+  "alibaba/qwen2.5-coder-32b-instruct": 73.7
+  "mistralai/codestral-25.01": 95.3
+
+  # Context windows (tokens)
+  "google/gemini-2.5-pro-exp": 2000000
+  "google/gemini-2.0-pro-exp": 1000000
+  "openai/gpt-5": 272000
+  "anthropic/claude-*": 200000
+  "meta-llama/llama-3.3-70b-instruct": 128000
+
+# User interface options
+ui_options:
+  show_model_selection: true  # Show which model is being used
+  show_cost_estimate: true    # Show cost before execution
+  allow_strategy_override: true  # Let user override per request
+  show_quality_score: true    # Display expected quality
+  explain_selection: true     # Explain why model was chosen

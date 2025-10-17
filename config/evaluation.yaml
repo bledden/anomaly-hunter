@@ -1,0 +1,73 @@
+# Enhanced Evaluation System Configuration
+# Controls which evaluators run and their settings
+
+evaluation:
+  enabled: true  # Master switch for all evaluations
+
+  # When to run evaluations
+  hooks:
+    post_refiner: true      # Evaluate after refinement stage
+    post_documenter: false  # Evaluate documentation (optional)
+
+  # Gating: Block workflow if evaluation fails
+  gate_on_failure: false  # If true, stops workflow when evaluation fails
+  pass_threshold: 0.7     # Minimum overall score to pass
+
+  # Individual Evaluators
+  evaluators:
+    security:
+      enabled: true
+      weight: 0.30  # 30% of overall score
+      min_score: 0.6
+      severity_threshold: "MEDIUM"  # Report MEDIUM and above
+
+    static_analysis:
+      enabled: true
+      weight: 0.30  # 30% of overall score
+      min_score: 0.6
+      pylint_threshold: 7.0  # Min pylint score (0-10)
+      flake8_max_violations: 20
+      mypy_max_errors: 10
+
+    complexity:
+      enabled: true
+      weight: 0.20  # 20% of overall score
+      min_score: 0.6
+      max_acceptable_complexity: 10  # Max cyclomatic complexity
+      min_maintainability: 20.0      # Min maintainability index
+
+    llm_judge:
+      enabled: true
+      weight: 0.20  # 20% of overall score
+      min_score: 0.6
+      model: "anthropic/claude-sonnet-4.5"
+      temperature: 0.3
+
+  # Timeouts (seconds)
+  timeouts:
+    security: 30
+    static_analysis: 30
+    complexity: 30
+    llm_judge: 60
+
+  # Logging & Observability
+  logging:
+    log_to_weave: true     # Log scores to W&B Weave
+    log_to_console: true   # Print scores to console
+    verbose: false         # Detailed evaluation output
+
+# Orchestration Configuration
+orchestration:
+  # Total execution budget and stage timeouts
+  timeouts:
+    total_budget_seconds: 900.0     # 15 minutes total execution time
+    default_stage_timeout: 180.0    # 3 minutes per stage default
+
+    # Stage-specific timeout multipliers (applied to default_stage_timeout)
+    stage_multipliers:
+      architecture: 1.5      # 270s = 4.5 minutes for architecture
+      implementation: 1.2    # 216s = 3.6 minutes for implementation
+      review: 1.0            # 180s = 3 minutes for review
+      refinement: 1.0        # 180s = 3 minutes for refinement
+      documentation: 1.0     # 180s = 3 minutes for documentation
+      testing: 1.0           # 180s = 3 minutes for testing
