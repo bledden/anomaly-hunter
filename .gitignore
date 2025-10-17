@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+anomaly_hunter.log
+facilitair_*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Data
+*.csv
+*.parquet
+*.json
+data/
+demo/output/
+
+# Models & Artifacts
+models/
+checkpoints/
+*.pkl
+*.joblib
+*.h5
+*.pb
+
+# TrueFoundry
+.truefoundry/
+tfy-config/
+
+# Sentry
+.sentryclirc
+
+# Audio (ElevenLabs output)
+*.mp3
+*.wav
+audio_output/
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# System
+.DS_Store
+Thumbs.db
