@@ -7,6 +7,7 @@ import aiohttp
 import os
 from typing import Dict, Any, Optional
 import asyncio
+import openai
 
 
 class StackAIGateway:
@@ -42,7 +43,7 @@ class StackAIGateway:
         # Flow routing map - maps model names to Stack AI flow IDs
         self.flow_map = {
             "openai/gpt-5-pro": "68f2bece9e2d263db0c93aa3",            # Pattern Analyst flow (GPT-5 Pro)
-            "anthropic/claude-sonnet-3-5": "68f2c162c148d3edaa517114",  # Root Cause flow (Claude 3.5 Sonnet)
+            "anthropic/claude-sonnet-4-5": "68f2c162c148d3edaa517114",  # Root Cause flow (Claude 4.5 Sonnet)
         }
 
         self.base_url = "https://api.stack-ai.com/inference/v0"
@@ -130,27 +131,38 @@ class StackAIGateway:
             return self._fallback_response(model, prompt)
 
     def _fallback_response(self, model: str, prompt: str) -> str:
-        """Fallback response when StackAI unavailable"""
+        """Fallback response using direct OpenAI API when Stack AI unavailable"""
 
-        # Extract request type from prompt
-        if "severity" in prompt.lower():
-            if "pattern" in model.lower() or "gpt-4" in model:
-                return """Severity: 7
-Pattern: Statistical anomalies detected with Z-scores exceeding 3σ threshold
-Impact: Moderate deviation from baseline requiring investigation"""
+        try:
+            # Use OpenAI API directly as fallback
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            if not openai_api_key:
+                return "Severity: 5\nAnalysis: Fallback failed - no OpenAI API key"
 
-            elif "change" in model.lower() or "claude" in model:
-                return """Severity: 6
-Pattern: Time-series drift detected with multiple change points
-Cause: Possible system load increase or configuration change"""
+            # Set OpenAI client
+            from openai import OpenAI
+            client = OpenAI(api_key=openai_api_key)
 
-            elif "root" in model.lower() or "o1" in model:
-                return """Severity: 7
-Hypothesis: System resource contention causing performance degradation
-Evidence: Temporal clustering suggests correlated events
-Confidence: 0.65"""
+            # Choose appropriate OpenAI model based on original request
+            fallback_model = "gpt-4o-mini"  # Fast and cheap fallback
 
-        return "Severity: 5\nAnalysis: Fallback mode - StackAI unavailable"
+            # Make synchronous OpenAI call (in fallback path, acceptable)
+            response = client.chat.completions.create(
+                model=fallback_model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=500
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"[ERROR] Fallback to OpenAI failed: {e}")
+            # Last resort: basic rule-based response
+            if "severity" in prompt.lower():
+                return """Severity: 5
+Analysis: Both Stack AI and OpenAI fallback unavailable. Basic statistical analysis suggests investigating data patterns."""
+            return "Severity: 5\nAnalysis: Fallback unavailable"
 
     async def close(self):
         """Close aiohttp session"""

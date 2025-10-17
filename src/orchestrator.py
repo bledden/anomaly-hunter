@@ -16,6 +16,9 @@ import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
 
+# Autonomous Learning
+from learning.autonomous_learner import AutonomousLearner
+
 
 @dataclass
 class AnomalyContext:
@@ -69,6 +72,7 @@ class AnomalyOrchestrator:
         """
         self.stackai = stackai_client
         self.agents = []
+        self.learner = AutonomousLearner()  # Autonomous learning engine
         self._load_agents()
 
     def _load_agents(self):
@@ -116,6 +120,10 @@ class AnomalyOrchestrator:
         # Step 3: Generate recommendation
         print("[STEP 3/3] Generating recommendation...")
         verdict.recommendation = self._generate_recommendation(verdict)
+
+        # Step 4: AUTONOMOUS LEARNING - Learn from this detection
+        print("[STEP 4/4] Learning from detection...")
+        self.learner.learn_from_outcome(verdict, was_correct=None)  # Will improve with feedback
 
         print(f"[ORCHESTRATOR] Investigation complete. Severity: {verdict.severity}/10")
         return verdict
@@ -195,12 +203,23 @@ class AnomalyOrchestrator:
                 timestamp=datetime.now().isoformat()
             )
 
-        # Confidence-weighted severity
-        total_weight = sum(f.confidence for f in findings)
+        # AUTONOMOUS LEARNING: Compute adaptive weights based on historical performance
+        adaptive_weights = self.learner.compute_adaptive_weights(findings)
+
+        # Confidence-weighted severity with adaptive learning
+        total_weight = 0
+        weighted_severity_sum = 0
+
+        for finding in findings:
+            # Combine agent confidence with learned performance weight
+            adaptive_conf = adaptive_weights.get(finding.agent_name, finding.confidence)
+            weight = finding.confidence * (0.5 + 0.5 * adaptive_conf)  # Blend original + learned
+
+            total_weight += weight
+            weighted_severity_sum += finding.severity * weight
+
         if total_weight > 0:
-            weighted_severity = sum(
-                f.severity * f.confidence for f in findings
-            ) / total_weight
+            weighted_severity = weighted_severity_sum / total_weight
         else:
             weighted_severity = sum(f.severity for f in findings) / len(findings)
 

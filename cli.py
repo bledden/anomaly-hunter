@@ -16,6 +16,12 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from orchestrator import AnomalyOrchestrator, AnomalyContext
 from integrations.stackai_gateway import StackAIGateway
+from integrations.sentry_monitoring import initialize_sentry, track_anomaly_detection
+from integrations.redpanda_streaming import RedpandaStreaming
+from integrations.senso_rag import SensoRAG
+from integrations.airia_workflows import AiriaWorkflows
+from integrations.truefoundry_deployment import TrueFoundryDeployment
+import time
 
 
 def print_banner():
@@ -52,24 +58,44 @@ async def detect_command(data_path: str):
 
     print(f"[OK] Loaded {len(data)} data points")
 
+    # Initialize all sponsor integrations
+    print("[INIT] Initializing sponsor integrations...")
+    initialize_sentry()  # Sentry monitoring
+    truefoundry = TrueFoundryDeployment()  # TrueFoundry ML platform
+    airia = AiriaWorkflows()  # Airia data workflows
+    senso = SensoRAG()  # Senso knowledge base
+    redpanda = RedpandaStreaming()  # Redpanda event streaming
+    stackai = StackAIGateway()  # StackAI model routing
+
+    # Preprocess data with Airia
+    print("[AIRIA] Preprocessing data...")
+    preprocessed = airia.preprocess_data(data)
+    quality = airia.validate_data_quality(data)
+
+    # Retrieve historical context from Senso
+    print("[SENSO] Retrieving historical context...")
+    senso_context = senso.retrieve_context(f"Anomaly in {data_path}: mean={np.mean(data):.2f}, std={np.std(data):.2f}")
+
     # Create context
     context = AnomalyContext(
-        data=data,
+        data=preprocessed['data'],
         timestamps=timestamps,
-        metadata={"source": data_path}
+        metadata={
+            "source": data_path,
+            "quality_score": quality['quality_score'],
+            "preprocessing": preprocessed['metadata']
+        }
     )
-
-    # Initialize StackAI gateway
-    print("[INIT] Initializing StackAI gateway...")
-    stackai = StackAIGateway()
 
     # Create orchestrator
     print("[INIT] Starting anomaly orchestrator...")
     orchestrator = AnomalyOrchestrator(stackai_client=stackai)
 
-    # Run investigation
+    # Run investigation with timing
     print("\n" + "-"*70)
-    verdict = await orchestrator.investigate(context)
+    start_time = time.time()
+    verdict = await orchestrator.investigate(context, senso_context=senso_context)
+    duration_ms = (time.time() - start_time) * 1000
     print("-"*70)
 
     # Display results
@@ -85,6 +111,31 @@ async def detect_command(data_path: str):
     print(f"  {verdict.recommendation}")
     print("="*70)
 
+    # Track anomaly in Sentry
+    print("\n[SENTRY] Tracking anomaly event...")
+    track_anomaly_detection(verdict)
+
+    # Log to TrueFoundry
+    print("[TRUEFOUNDRY] Logging inference metrics...")
+    truefoundry.log_inference(verdict)
+    agent_timings = {f.agent_name: 1000 for f in verdict.agent_findings}  # Placeholder timings
+    truefoundry.log_performance(duration_ms, agent_timings)
+
+    # Publish to Redpanda stream
+    print("[REDPANDA] Publishing to event stream...")
+    redpanda.publish_anomaly_event(verdict)
+
+    # Store in Senso knowledge base
+    print("[SENSO] Storing in knowledge base...")
+    senso.store_anomaly(verdict)
+
+    # Generate voice alert for critical anomalies (severity >= 8)
+    if verdict.severity >= 8:
+        print("\n🔊 Generating voice alert for critical anomaly...")
+        from src.integrations.elevenlabs_voice import ElevenLabsVoice
+        voice = ElevenLabsVoice()
+        voice.generate_alert(verdict.summary, verdict.severity, verdict.confidence)
+
     # Agent details
     print("\n" + "="*70)
     print("  AGENT FINDINGS")
@@ -99,6 +150,7 @@ async def detect_command(data_path: str):
 
     # Cleanup
     await stackai.close()
+    redpanda.close()
 
 
 def demo_command():
