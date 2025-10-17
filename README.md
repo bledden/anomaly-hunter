@@ -237,6 +237,21 @@ render deploy
 
 ---
 
+## 📚 Documentation
+
+### Setup & Configuration
+- [Setup Status](docs/SETUP_STATUS.md) - Initial project setup and tasks completed
+- [API Keys Status](docs/API_KEYS_STATUS.md) - API configuration and integration status
+- [Preparation Complete](docs/PREP_WORK_COMPLETE.md) - Hackathon prep work summary
+- [Redpanda Connection Guide](docs/GET_REDPANDA_DETAILS.md) - How to get Redpanda cluster details
+
+### Demo Resources
+- [Demo Datasets Ready](docs/DEMO_DATASETS_READY.md) - Overview of 7 realistic demo scenarios
+- [Demo Scenarios](demo/DEMO_SCENARIOS.md) - Detailed documentation of each scenario
+- [Generate Test Data](demo/generate_realistic_data.py) - Script to create demo datasets
+
+---
+
 ## 📖 API Documentation
 
 ### REST API
