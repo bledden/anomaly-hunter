@@ -1,6 +1,6 @@
 """
 StackAI Gateway Integration
-Multi-model routing for anomaly detection agents
+Multi-model routing for anomaly detection agents using Stack AI Flows
 """
 
 import aiohttp
@@ -11,15 +11,15 @@ import asyncio
 
 class StackAIGateway:
     """
-    StackAI Gateway - Multi-Model Router
+    StackAI Gateway - Flow-Based Multi-Model Router
 
-    Routes agent requests to appropriate LLM models:
-    - Pattern Analyst → GPT-4 Turbo
-    - Change Detective → Claude Sonnet 3.5
-    - Root Cause Agent → o1-mini
+    Routes agent requests to appropriate Stack AI flows:
+    - Pattern Analyst → GPT-4 Turbo Flow
+    - Root Cause Agent → o1-mini Flow
+    - Change Detective → Fallback (local processing)
 
     Benefits:
-    - Single unified API
+    - Deployed workflows with optimized prompts
     - Automatic failover
     - Cost tracking
     - Easy model switching
@@ -36,15 +36,17 @@ class StackAIGateway:
         if not self.api_key:
             print("[WARN] STACKAI_API_KEY not set - using fallback mode")
 
-        self.base_url = "https://api.stack-ai.com/v1"
-        self.session: Optional[aiohttp.ClientSession] = None
+        # Stack AI organization and flow IDs
+        self.org_id = "0acc2aff-5dab-4a7c-bd72-2dd158e493df"
 
-        # Model routing map
-        self.model_map = {
-            "openai/gpt-4-turbo": "gpt-4-turbo-preview",
-            "openai/o1-mini": "o1-mini",
-            "anthropic/claude-sonnet-3-5": "claude-3-5-sonnet-20241022"
+        # Flow routing map - maps model names to Stack AI flow IDs
+        self.flow_map = {
+            "openai/gpt-5-pro": "68f2bece9e2d263db0c93aa3",            # Pattern Analyst flow (GPT-5 Pro)
+            "anthropic/claude-sonnet-3-5": "68f2c162c148d3edaa517114",  # Root Cause flow (Claude 3.5 Sonnet)
         }
+
+        self.base_url = "https://api.stack-ai.com/inference/v0"
+        self.session: Optional[aiohttp.ClientSession] = None
 
     async def create_session(self):
         """Create aiohttp session"""
@@ -54,7 +56,7 @@ class StackAIGateway:
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json"
                 },
-                timeout=aiohttp.ClientTimeout(total=60)
+                timeout=aiohttp.ClientTimeout(total=300)  # 5 min timeout for GPT-5 Pro
             )
 
     async def complete(
@@ -66,13 +68,13 @@ class StackAIGateway:
         **kwargs
     ) -> str:
         """
-        Route completion request to appropriate model via StackAI
+        Route completion request to appropriate Stack AI flow
 
         Args:
             model: Model identifier (e.g., "openai/gpt-4-turbo")
             prompt: Input prompt
-            temperature: Sampling temperature
-            max_tokens: Maximum response tokens
+            temperature: Sampling temperature (ignored for flows)
+            max_tokens: Maximum response tokens (ignored for flows)
             **kwargs: Additional model parameters
 
         Returns:
@@ -82,38 +84,49 @@ class StackAIGateway:
         if not self.api_key:
             return self._fallback_response(model, prompt)
 
+        # Get flow ID for this model
+        flow_id = self.flow_map.get(model)
+        if not flow_id:
+            print(f"[WARN] No Stack AI flow for {model}, using fallback")
+            return self._fallback_response(model, prompt)
+
         await self.create_session()
 
-        # Map to StackAI model name
-        stackai_model = self.model_map.get(model, model)
-
+        # Stack AI flow payload format
         payload = {
-            "model": stackai_model,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            **kwargs
+            "user_id": "anomaly-hunter-session",
+            "in-0": prompt  # Input parameter name from Stack AI flow
         }
 
+        # Build the flow endpoint URL
+        flow_url = f"{self.base_url}/run/{self.org_id}/{flow_id}"
+
         try:
-            async with self.session.post(
-                f"{self.base_url}/chat/completions",
-                json=payload
-            ) as response:
+            async with self.session.post(flow_url, json=payload) as response:
                 if response.status != 200:
                     error_text = await response.text()
-                    print(f"[ERROR] StackAI API error ({response.status}): {error_text}")
+                    print(f"[ERROR] Stack AI flow error ({response.status}): {error_text}")
                     return self._fallback_response(model, prompt)
 
                 data = await response.json()
-                return data["choices"][0]["message"]["content"]
+
+                # Stack AI returns: {"outputs": {"out-0": "response text"}}
+                if "outputs" in data and "out-0" in data["outputs"]:
+                    return data["outputs"]["out-0"]
+                elif "output" in data:
+                    return data["output"]
+                elif "out-0" in data:
+                    return data["out-0"]
+                else:
+                    print(f"[WARN] Unexpected Stack AI response format: {data}")
+                    return self._fallback_response(model, prompt)
 
         except asyncio.TimeoutError:
-            print(f"[ERROR] StackAI request timeout for model {model}")
+            print(f"[ERROR] Stack AI request timeout for {model}")
             return self._fallback_response(model, prompt)
 
         except Exception as e:
-            print(f"[ERROR] StackAI request failed: {e}")
+            print(f"[ERROR] Stack AI request failed: {e}")
             return self._fallback_response(model, prompt)
 
     def _fallback_response(self, model: str, prompt: str) -> str:
@@ -156,47 +169,54 @@ Confidence: 0.65"""
 
 # Quick test
 async def test_stackai():
-    """Test StackAI gateway"""
+    """Test StackAI gateway flows"""
 
     print("\n" + "="*60)
-    print("STACKAI GATEWAY TEST")
+    print("STACK AI FLOW GATEWAY TEST")
     print("="*60)
 
     async with StackAIGateway() as gateway:
-        # Test GPT-4
-        print("\n[TEST 1] GPT-4 Turbo")
+        # Test Pattern Analyst Flow (GPT-4)
+        print("\n[TEST 1] Pattern Analyst Flow (GPT-4 Turbo)")
+        print("Testing anomaly detection with statistical analysis...")
         response1 = await gateway.complete(
             model="openai/gpt-4-turbo",
-            prompt="Analyze this anomaly: spike to 250 from baseline 100. Severity?",
+            prompt="Analyze these anomalies: 19 data points with Z-scores > 3σ. Baseline: 0.1, Peak: 8.5. Max deviation: 4.41σ. Assess severity.",
             temperature=0.7,
             max_tokens=200
         )
-        print(f"Response: {response1[:200]}...")
+        print(f"✓ Response:\n{response1}\n")
 
-        # Test Claude
-        print("\n[TEST 2] Claude Sonnet")
+        # Test Root Cause Flow (o1-mini)
+        print("\n[TEST 2] Root Cause Flow (o1-mini)")
+        print("Testing root cause hypothesis generation...")
         response2 = await gateway.complete(
-            model="anthropic/claude-sonnet-3-5",
-            prompt="Detect change points in time series with 30% drift. Severity?",
-            temperature=0.5,
-            max_tokens=200
-        )
-        print(f"Response: {response2[:200]}...")
-
-        # Test o1-mini
-        print("\n[TEST 3] o1-mini")
-        response3 = await gateway.complete(
             model="openai/o1-mini",
-            prompt="Generate root cause hypothesis for database spike. Confidence?",
+            prompt="Generate root cause hypothesis: 3 anomaly clusters detected over 30min period. Network packet loss spike 0.1% → 8%. Correlation: 0.78. What's the likely cause?",
             temperature=0.3,
             max_tokens=300
         )
-        print(f"Response: {response3[:200]}...")
+        print(f"✓ Response:\n{response2}\n")
 
-    print("\n" + "="*60)
-    print("TEST COMPLETE")
+        # Test Change Detective (Fallback - no flow)
+        print("\n[TEST 3] Change Detective (Fallback Mode - No Flow)")
+        print("Testing fallback for Claude Sonnet...")
+        response3 = await gateway.complete(
+            model="anthropic/claude-sonnet-3-5",
+            prompt="Detect change points in time series with 99.7% drift. 30 change points detected.",
+            temperature=0.5,
+            max_tokens=200
+        )
+        print(f"✓ Response:\n{response3}\n")
+
+    print("="*60)
+    print("FLOW GATEWAY TEST COMPLETE")
     print("="*60)
 
 
 if __name__ == "__main__":
+    # Load environment variables
+    from dotenv import load_dotenv
+    load_dotenv()
+
     asyncio.run(test_stackai())

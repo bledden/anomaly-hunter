@@ -27,7 +27,7 @@ class RootCauseAgent:
             stackai_client: StackAI gateway for model routing
         """
         self.stackai = stackai_client
-        self.model = "openai/o1-mini"
+        self.model = "anthropic/claude-sonnet-3-5"  # Claude 3.5 Sonnet via Stack AI
         self.name = "root_cause"
 
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:

@@ -28,7 +28,7 @@ class PatternAnalyst:
             stackai_client: StackAI gateway for model routing
         """
         self.stackai = stackai_client
-        self.model = "openai/gpt-4-turbo"
+        self.model = "openai/gpt-5-pro"  # GPT-5 Pro via Stack AI
         self.name = "pattern_analyst"
 
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
