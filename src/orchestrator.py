@@ -16,6 +16,14 @@ import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
 
+# Active Integrations
+import sentry_sdk
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN"),
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
+
 # Autonomous Learning
 from learning.autonomous_learner import AutonomousLearner
 
@@ -124,6 +132,21 @@ class AnomalyOrchestrator:
         # Step 4: AUTONOMOUS LEARNING - Learn from this detection
         print("[STEP 4/4] Learning from detection...")
         self.learner.learn_from_outcome(verdict, was_correct=None)  # Will improve with feedback
+
+        # Step 5: Log to Sentry for production monitoring
+        try:
+            sentry_sdk.capture_message(
+                f"Anomaly detected: Severity {verdict.severity}/10",
+                level="warning" if verdict.severity >= 7 else "info"
+            )
+            sentry_sdk.set_context("detection", {
+                "severity": verdict.severity,
+                "confidence": verdict.confidence,
+                "anomaly_count": len(verdict.anomalies_detected)
+            })
+            print("[SENTRY] ✅ Logged to production monitoring")
+        except:
+            pass  # Don't fail if Sentry unavailable
 
         print(f"[ORCHESTRATOR] Investigation complete. Severity: {verdict.severity}/10")
         return verdict
