@@ -94,6 +94,8 @@ class RedpandaStreaming:
             future.get(timeout=10)  # Block until sent
 
             print(f"[REDPANDA] 📡 Event published to {topic} (severity {verdict.severity}/10)")
+            print(f"[REDPANDA]   └─ Action: Streamed real-time anomaly event to Kafka topic")
+            print(f"[REDPANDA]   └─ Result: Event contains {len(verdict.agent_findings)} agent findings + context")
             return True
 
         except Exception as e:

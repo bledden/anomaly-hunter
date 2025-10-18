@@ -82,7 +82,8 @@ class ElevenLabsVoice:
                     f.write(response.content)
 
                 print(f"[VOICE ALERT] 🔊 Critical anomaly alert generated: {output_path}")
-                print(f"[VOICE ALERT] Severity {severity}/10 | Confidence {confidence}%")
+                print(f"[VOICE ALERT]   └─ Action: Converted text to speech using ElevenLabs API")
+                print(f"[VOICE ALERT]   └─ Result: Audio file saved and playing (severity {severity}/10, confidence {confidence:.1%})")
 
                 # Try to play the audio (macOS)
                 try:

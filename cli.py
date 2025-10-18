@@ -171,26 +171,6 @@ def demo_command():
     asyncio.run(detect_command(data_path))
 
 
-def metrics_command():
-    """Show TrueFoundry metrics"""
-
-    print("[TRUEFOUNDRY] Initializing deployment tracker...")
-    truefoundry = TrueFoundryDeployment()
-
-    if not truefoundry.enabled:
-        print("[ERROR] TrueFoundry is not enabled. Set TRUEFOUNDRY_API_KEY in .env")
-        return
-
-    # Print summary
-    truefoundry.print_metrics_summary()
-
-    # Show raw Prometheus metrics
-    print("[TRUEFOUNDRY] Raw Prometheus Metrics:")
-    print("-" * 70)
-    print(truefoundry.get_metrics())
-    print("-" * 70)
-
-
 def help_command():
     """Show help"""
 
@@ -201,7 +181,6 @@ USAGE:
 COMMANDS:
   detect <file>   Detect anomalies in CSV file
   demo            Generate demo dataset and run detection
-  metrics         Show TrueFoundry Prometheus metrics
   help            Show this help message
 
 EXAMPLES:
@@ -210,9 +189,6 @@ EXAMPLES:
 
   # Detect anomalies in your data
   python3 cli.py detect data/metrics.csv
-
-  # View TrueFoundry metrics
-  python3 cli.py metrics
 
 CSV FORMAT:
   Required columns:
@@ -257,9 +233,6 @@ def main():
 
     elif command == "demo":
         demo_command()
-
-    elif command == "metrics":
-        metrics_command()
 
     elif command == "help" or command == "--help" or command == "-h":
         help_command()

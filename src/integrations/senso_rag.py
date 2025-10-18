@@ -28,9 +28,10 @@ class SensoRAG:
             print("[WARN] Senso credentials missing - RAG disabled")
             return
 
-        self.base_url = "https://api.senso.ai/v1"
+        self.base_url = "https://sdk.senso.ai/api/v1"  # Correct Senso SDK endpoint
         self.enabled = True
         print("[SENSO] ✅ RAG knowledge base initialized")
+        print(f"[SENSO]   └─ API endpoint: {self.base_url}")
 
     def retrieve_context(self, anomaly_description: str, top_k: int = 3) -> Optional[str]:
         """
@@ -48,7 +49,7 @@ class SensoRAG:
             return None
 
         try:
-            # Query Senso RAG endpoint
+            # Query Senso search endpoint (correct API structure)
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
@@ -56,18 +57,19 @@ class SensoRAG:
 
             payload = {
                 "query": anomaly_description,
-                "org_id": self.org_id,
-                "top_k": top_k,
-                "include_metadata": True
+                "limit": top_k,
+                "org_id": self.org_id
             }
 
-            # Note: Using generic endpoint structure - adjust based on actual Senso API docs
+            # Use correct Senso search endpoint
             response = requests.post(
-                f"{self.base_url}/query",
+                f"{self.base_url}/search",
                 json=payload,
                 headers=headers,
                 timeout=10
             )
+
+            print(f"[SENSO] 🔍 Querying RAG for similar anomalies...")
 
             if response.status_code == 200:
                 data = response.json()
@@ -83,10 +85,16 @@ class SensoRAG:
 
                 if context_parts:
                     context = "Historical patterns:\n" + "\n".join(context_parts)
-                    print(f"[SENSO] 📚 Retrieved {len(context_parts)} similar cases")
+                    print(f"[SENSO] 📚 Retrieved {len(context_parts)} similar historical cases")
+                    print(f"[SENSO]   └─ Action: Provided RAG context from knowledge base")
                     return context
+                else:
+                    print(f"[SENSO] ℹ️  No matching historical patterns found (new anomaly type)")
+                    return None
 
-            return None
+            else:
+                print(f"[SENSO] ⚠️  API returned status {response.status_code}")
+                return None
 
         except Exception as e:
             print(f"[WARN] Senso RAG query failed: {e}")
@@ -124,9 +132,9 @@ class SensoRAG:
                 "org_id": self.org_id
             }
 
-            # Store in Senso knowledge base
+            # Store in Senso knowledge base using content/raw endpoint
             response = requests.post(
-                f"{self.base_url}/documents",
+                f"{self.base_url}/content/raw",
                 json=document,
                 headers=headers,
                 timeout=10
@@ -134,9 +142,11 @@ class SensoRAG:
 
             if response.status_code in [200, 201]:
                 print(f"[SENSO] 💾 Stored anomaly in knowledge base")
+                print(f"[SENSO]   └─ Action: Added severity {verdict.severity}/10 case to RAG for future learning")
                 return True
-
-            return False
+            else:
+                print(f"[SENSO] ⚠️  Storage failed (status {response.status_code})")
+                return False
 
         except Exception as e:
             print(f"[WARN] Senso storage failed: {e}")

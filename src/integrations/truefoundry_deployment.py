@@ -5,7 +5,12 @@ ML platform for model deployment, scaling, and monitoring
 
 import os
 from typing import Optional, Dict, Any
-from prometheus_client import Counter, Histogram, Gauge, REGISTRY
+
+try:
+    import truefoundry.ml as tfm
+    TRUEFOUNDRY_AVAILABLE = True
+except ImportError:
+    TRUEFOUNDRY_AVAILABLE = False
 
 
 class TrueFoundryDeployment:
@@ -16,69 +21,60 @@ class TrueFoundryDeployment:
     for production anomaly detection service
     """
 
-    # Class-level metrics (shared across all instances)
-    _metrics_initialized = False
-    _inference_count = None
-    _inference_latency = None
-    _anomaly_severity = None
-    _anomaly_confidence = None
-
     def __init__(self):
-        """Initialize TrueFoundry client with Prometheus metrics"""
+        """Initialize TrueFoundry ML client"""
 
-        self.api_key = os.getenv("TRUEFOUNDRY_API_KEY")
+        # Check for TFY_API_KEY (standard) or TRUEFOUNDRY_API_KEY (fallback)
+        self.api_key = os.getenv("TFY_API_KEY") or os.getenv("TRUEFOUNDRY_API_KEY")
         self.workspace = os.getenv("TRUEFOUNDRY_WORKSPACE", "sfhack")
+        self.ml_repo = "anomaly-hunter"
         self.enabled = False
+        self.client = None
+        self.run = None
+        self.inference_count = 0
 
-        # Initialize metrics once at class level (shared across instances)
-        if not TrueFoundryDeployment._metrics_initialized:
-            TrueFoundryDeployment._inference_count = Counter(
-                'anomaly_hunter_inference_total',
-                'Total number of anomaly detection inferences',
-                ['workspace', 'deployment_id']
-            )
-
-            TrueFoundryDeployment._inference_latency = Histogram(
-                'anomaly_hunter_inference_duration_seconds',
-                'Time spent processing inference requests',
-                ['workspace', 'deployment_id']
-            )
-
-            TrueFoundryDeployment._anomaly_severity = Gauge(
-                'anomaly_hunter_severity_score',
-                'Current anomaly severity score (0-10)',
-                ['workspace', 'deployment_id']
-            )
-
-            TrueFoundryDeployment._anomaly_confidence = Gauge(
-                'anomaly_hunter_confidence_score',
-                'Detection confidence percentage',
-                ['workspace', 'deployment_id']
-            )
-
-            TrueFoundryDeployment._metrics_initialized = True
-
-        # Use class-level metrics
-        self.inference_count = TrueFoundryDeployment._inference_count
-        self.inference_latency = TrueFoundryDeployment._inference_latency
-        self.anomaly_severity = TrueFoundryDeployment._anomaly_severity
-        self.anomaly_confidence = TrueFoundryDeployment._anomaly_confidence
-
-        if not self.api_key:
-            print("[WARN] TrueFoundry API key missing - deployment tracking disabled")
+        if not TRUEFOUNDRY_AVAILABLE:
+            print("[WARN] TrueFoundry SDK not installed - deployment tracking disabled")
             return
 
-        self.enabled = True
-        self.deployment_id = "anomaly-hunter-v1"
-        print(f"[TRUEFOUNDRY] ✅ Deployment tracking initialized (workspace: {self.workspace})")
-        if not TrueFoundryDeployment._metrics_initialized:
-            print(f"[TRUEFOUNDRY] 📊 Prometheus metrics initialized")
-        else:
-            print(f"[TRUEFOUNDRY] 📊 Using existing Prometheus metrics")
+        if not self.api_key:
+            print("[WARN] TrueFoundry API key missing (set TFY_API_KEY env var) - deployment tracking disabled")
+            return
+
+        try:
+            # Set API key for SDK
+            os.environ["TFY_API_KEY"] = self.api_key
+
+            # Initialize TrueFoundry client
+            self.client = tfm.get_client()
+
+            # Create ML repo if it doesn't exist
+            try:
+                self.client.create_ml_repo(self.ml_repo)
+            except Exception as e:
+                # Repo might already exist - that's okay
+                if "already exists" not in str(e).lower():
+                    raise
+
+            # Create a run for this session
+            self.run = self.client.create_run(
+                ml_repo=self.ml_repo,
+                run_name=f"detection-session-{self.workspace}"
+            )
+
+            self.enabled = True
+            print(f"[TRUEFOUNDRY] ✅ ML tracking initialized (workspace: {self.workspace})")
+            print(f"[TRUEFOUNDRY] 📊 Run created: {self.run.run_name}")
+            print(f"[TRUEFOUNDRY] 🔗 View metrics at TrueFoundry dashboard")
+
+        except Exception as e:
+            print(f"[WARN] TrueFoundry initialization failed: {e}")
+            print(f"[WARN] To enable: Set TFY_API_KEY environment variable with your TrueFoundry token")
+            self.enabled = False
 
     def log_inference(self, verdict: Any) -> bool:
         """
-        Log inference metrics to TrueFoundry via Prometheus
+        Log inference metrics to TrueFoundry ML platform
 
         Args:
             verdict: Anomaly detection verdict
@@ -87,40 +83,35 @@ class TrueFoundryDeployment:
             True if logged successfully
         """
 
-        if not self.enabled:
+        if not self.enabled or not self.run:
             return False
 
         try:
-            # Increment inference counter
-            self.inference_count.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            ).inc()
+            self.inference_count += 1
 
-            # Update severity gauge
-            self.anomaly_severity.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            ).set(verdict.severity)
-
-            # Update confidence gauge
-            self.anomaly_confidence.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            ).set(verdict.confidence * 100)
+            # Log metrics to TrueFoundry
+            self.run.log_metrics({
+                "severity": float(verdict.severity),
+                "confidence": float(verdict.confidence * 100),
+                "anomaly_count": float(len(verdict.anomalies_detected)),
+                "agent_count": float(len(verdict.agent_findings))
+            }, step=self.inference_count)
 
             print(f"[TRUEFOUNDRY] 📈 Logged inference: severity={verdict.severity}/10, confidence={verdict.confidence:.1%}")
-            print(f"[TRUEFOUNDRY] ✅ Prometheus metrics updated (inference #{int(self.inference_count.labels(workspace=self.workspace, deployment_id=self.deployment_id)._value.get())})")
+            print(f"[TRUEFOUNDRY]   └─ Action: Tracked metrics to ML platform (run: {self.run.run_name})")
+            print(f"[TRUEFOUNDRY] ✅ Metrics logged (inference #{self.inference_count})")
 
             return True
 
         except Exception as e:
             print(f"[WARN] TrueFoundry logging failed: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     def log_performance(self, duration_ms: float, agent_timings: Dict[str, float]) -> bool:
         """
-        Log performance metrics to Prometheus histogram
+        Log performance metrics to TrueFoundry
 
         Args:
             duration_ms: Total inference duration in milliseconds
@@ -130,21 +121,26 @@ class TrueFoundryDeployment:
             True if logged successfully
         """
 
-        if not self.enabled:
+        if not self.enabled or not self.run:
             return False
 
         try:
-            # Record latency in seconds
-            duration_seconds = duration_ms / 1000.0
-            self.inference_latency.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            ).observe(duration_seconds)
+            # Log latency metrics
+            self.run.log_metrics({
+                "latency_ms": float(duration_ms),
+                "latency_seconds": float(duration_ms / 1000.0)
+            }, step=self.inference_count)
 
-            print(f"[TRUEFOUNDRY] ⏱️  Performance: {duration_ms:.0f}ms total ({duration_seconds:.3f}s)")
+            # Log per-agent timings
+            for agent_name, timing in agent_timings.items():
+                self.run.log_metrics({
+                    f"agent_{agent_name}_ms": float(timing)
+                }, step=self.inference_count)
+
+            print(f"[TRUEFOUNDRY] ⏱️  Performance: {duration_ms:.0f}ms total")
             for agent, timing in agent_timings.items():
                 print(f"[TRUEFOUNDRY]   └─ {agent}: {timing:.0f}ms")
-            print(f"[TRUEFOUNDRY] ✅ Latency metric recorded")
+            print(f"[TRUEFOUNDRY] ✅ Performance metrics logged")
 
             return True
 
@@ -160,54 +156,17 @@ class TrueFoundryDeployment:
 
         return {
             "status": "active",
-            "deployment_id": self.deployment_id,
+            "run_name": self.run.run_name if self.run else "unknown",
             "workspace": self.workspace,
-            "environment": "production",
-            "version": "1.0.0"
+            "ml_repo": self.ml_repo,
+            "inference_count": self.inference_count
         }
 
-    def get_metrics(self) -> str:
-        """
-        Export Prometheus metrics in text format
-
-        Returns:
-            Prometheus metrics in exposition format
-        """
-        if not self.enabled:
-            return "# TrueFoundry metrics disabled"
-
-        from prometheus_client import generate_latest
-        return generate_latest(REGISTRY).decode('utf-8')
-
-    def print_metrics_summary(self):
-        """Print a human-readable summary of current metrics"""
-        if not self.enabled:
-            print("[TRUEFOUNDRY] Metrics disabled")
-            return
-
-        try:
-            inference_count = self.inference_count.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            )._value.get()
-
-            severity = self.anomaly_severity.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            )._value.get()
-
-            confidence = self.anomaly_confidence.labels(
-                workspace=self.workspace,
-                deployment_id=self.deployment_id
-            )._value.get()
-
-            print("\n[TRUEFOUNDRY] 📊 Metrics Summary")
-            print(f"  Workspace: {self.workspace}")
-            print(f"  Deployment: {self.deployment_id}")
-            print(f"  Total Inferences: {int(inference_count)}")
-            print(f"  Latest Severity: {severity}/10")
-            print(f"  Latest Confidence: {confidence:.1f}%")
-            print()
-
-        except Exception as e:
-            print(f"[WARN] Could not print metrics summary: {e}")
+    def end_run(self):
+        """End the current TrueFoundry run"""
+        if self.enabled and self.run:
+            try:
+                self.run.end()
+                print(f"[TRUEFOUNDRY] ✅ Run ended: {self.run.run_name}")
+            except Exception as e:
+                print(f"[WARN] Failed to end TrueFoundry run: {e}")

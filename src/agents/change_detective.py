@@ -27,7 +27,7 @@ class ChangeDetective:
             stackai_client: StackAI gateway for model routing
         """
         self.stackai = stackai_client
-        self.model = "anthropic/claude-sonnet-3-5"
+        self.model = "anthropic/claude-sonnet-4-5"  # Claude 4.5 Sonnet
         self.name = "change_detective"
 
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:

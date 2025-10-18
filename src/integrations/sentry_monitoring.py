@@ -52,7 +52,10 @@ def track_anomaly_detection(verdict: Any):
                 level="warning" if verdict.severity < 8 else "error"
             )
 
+        level_name = "ERROR" if verdict.severity >= 8 else "WARNING"
         print(f"[SENTRY] 📊 Tracked anomaly event (severity {verdict.severity}/10)")
+        print(f"[SENTRY]   └─ Action: Logged {level_name} event with {len(verdict.anomalies_detected)} anomalies to monitoring dashboard")
+        print(f"[SENTRY]   └─ Result: Event visible at https://sentry.io/organizations/anomaly-hunter/issues/")
 
     except Exception as e:
         print(f"[ERROR] Sentry tracking failed: {e}")

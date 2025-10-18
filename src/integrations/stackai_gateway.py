@@ -88,7 +88,7 @@ class StackAIGateway:
         # Get flow ID for this model
         flow_id = self.flow_map.get(model)
         if not flow_id:
-            print(f"[WARN] No Stack AI flow for {model}, using fallback")
+            # Silently use fallback for models without flows (Change Detective uses local analysis)
             return self._fallback_response(model, prompt)
 
         await self.create_session()

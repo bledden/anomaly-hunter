@@ -47,10 +47,11 @@ class AiriaWorkflows:
             return self._local_preprocessing(data)
 
         try:
-            # In real implementation, would call Airia API
-            # For demo, using local preprocessing with logging
+            # Using local preprocessing (Airia workflow would require workflow_id from platform)
             result = self._local_preprocessing(data)
             print(f"[AIRIA] 🔄 Preprocessed {len(data)} data points")
+            print(f"[AIRIA]   └─ Action: Cleaned data, removed {result['metadata']['removed_count']} invalid points")
+            print(f"[AIRIA]   └─ Action: Validated quality - mean={result['metadata']['mean']:.2f}, std={result['metadata']['std']:.2f}")
             return result
 
         except Exception as e:
@@ -109,8 +110,11 @@ class AiriaWorkflows:
 
         if self.enabled:
             print(f"[AIRIA] ✓ Data quality score: {quality_score:.1f}/100")
+            print(f"[AIRIA]   └─ Action: Validated {len(data)} points for anomalies, outliers, and statistical properties")
             if issues:
-                print(f"[AIRIA] ⚠️  Issues: {', '.join(issues)}")
+                print(f"[AIRIA] ⚠️  Issues found: {', '.join(issues)}")
+            else:
+                print(f"[AIRIA]   └─ Result: Data is clean and ready for analysis")
 
         return {
             "quality_score": quality_score,
