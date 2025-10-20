@@ -11,7 +11,7 @@ Built for **Production Readiness** - October 2025
 
 ---
 
-## 🎯 What It Does
+## [>>] What It Does
 
 Anomaly Hunter autonomously detects and investigates data anomalies using 3 specialized AI agents working in parallel:
 
@@ -21,11 +21,11 @@ Anomaly Hunter autonomously detects and investigates data anomalies using 3 spec
 
 **Result:** Real-time anomaly detection with confidence-scored root cause analysis.
 
-### ✅ Validated Performance
-- ✅ **100% Recall** on obvious anomalies (Easy/Medium difficulty)
-- ✅ **64% Average Confidence** across all agents  
-- ✅ **30+ Detections** processed through autonomous learning
-- ✅ **8/8 Sponsor integrations** fully operational
+### [✓] Validated Performance
+- [✓] **100% Recall** on obvious anomalies (Easy/Medium difficulty)
+- [✓] **64% Average Confidence** across all agents
+- [✓] **30+ Detections** processed through autonomous learning
+- [✓] **8/8 Sponsor integrations** fully operational
 
 **Agent Performance (30 detections tracked):**
 - Pattern Analyst: 78.3% avg confidence
@@ -36,7 +36,7 @@ See [test_efficacy.py](test_efficacy.py) and [test_realistic_datasets.py](test_r
 
 ---
 
-## 🚀 Quick Start
+## [>>>] Quick Start
 
 ```bash
 # Clone repository
@@ -56,7 +56,7 @@ python3 cli.py detect demo/sample_anomalies.csv
 
 ---
 
-## 💡 Why Anomaly Hunter?
+## [!] Why Anomaly Hunter?
 
 ### **The Problem with Traditional Monitoring**
 Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY**.
@@ -68,19 +68,19 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 
 ### **Benefits of Using Anomaly Hunter**
 
-#### **1. Speed & Efficiency** ⚡
+#### **1. Speed & Efficiency** [FAST]
 - **98% Faster Than Manual Investigation**: 2 hours → 3-5 seconds
 - **Real-Time Detection**: Sub-second event streaming via Redpanda
 - **Instant Alerts**: Voice notifications for critical anomalies (severity ≥ 8)
 - **Time Savings**: ~117 minutes saved per investigation
 
-#### **2. Accuracy & Reliability** 🎯
+#### **2. Accuracy & Reliability** [ACCURATE]
 - **40% Recall**: Catches critical production anomalies
 - **100% Recall on Obvious Anomalies**: Never misses easy/medium severity issues
 - **Low False Positive Rate**: Conservative detection avoids alert fatigue
 - **Confidence-Weighted Analysis**: Know exactly how certain the system is (64% avg confidence)
 
-#### **3. Autonomous Learning** 🧠
+#### **3. Autonomous Learning** [ADAPTIVE]
 - **35+ Detections Tracked**: Continuously learns from every investigation
 - **Dual Self-Improvement Systems**:
   - **Autonomous Learner**: Adapts agent weights based on historical performance
@@ -94,7 +94,7 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 | Change Detective | 82.2% | 35 |
 | Root Cause Agent | 76.9% | 35 |
 
-#### **4. Production-Ready Architecture** 🏗️
+#### **4. Production-Ready Architecture** [BUILT]
 - **8/8 Sponsors Fully Operational**: Not a demo - production integrations
 - **Multi-Model AI Routing**: GPT-4o-mini for speed, Claude Sonnet 4.5 for depth
 - **Real-Time Streaming**: Kafka-compatible event broker (Redpanda)
@@ -102,7 +102,7 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 - **Voice Alerts**: Critical anomalies announced via ElevenLabs
 - **Data Quality**: Airia preprocessing ensures clean inputs
 
-#### **5. Business Value & Productivity** 💰
+#### **5. Business Value & Productivity** [VALUE]
 
 **Time Savings Per Investigation:**
 - **Manual root cause analysis**: ~120 minutes (industry baseline)
@@ -130,18 +130,18 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 - **Minimal overhead**: Fraction of traditional monitoring tools
 - **High ROI**: Small investment, significant time savings
 
-> 💡 **The Value Proposition**: Anomaly Hunter transforms SRE productivity by eliminating investigation toil. Whether you use that capacity to handle more scale, improve reliability, or optimize headcount is your strategic decision. We provide the time savings - you decide how to use them.
+> [NOTE] **The Value Proposition**: Anomaly Hunter transforms SRE productivity by eliminating investigation toil. Whether you use that capacity to handle more scale, improve reliability, or optimize headcount is your strategic decision. We provide the time savings - you decide how to use them.
 
-> 📊 **Methodology**: All calculations based on measured performance data and conservative industry assumptions. See [Business Value Methodology](docs/guides/ROI_CALCULATION_METHODOLOGY.md) for full breakdown, data sources, and customization for your organization.
+> [DATA] **Methodology**: All calculations based on measured performance data and conservative industry assumptions. See [Business Value Methodology](docs/guides/ROI_CALCULATION_METHODOLOGY.md) for full breakdown, data sources, and customization for your organization.
 
-#### **6. Transparency & Trust** 🔍
+#### **6. Transparency & Trust** [TRUST]
 - **Multi-Agent Consensus**: 3 specialized agents cross-validate findings
 - **Confidence Scores**: See exactly how certain each agent is
 - **Evidence-Based**: Not "anomaly detected" - provides specific root cause hypotheses
 - **Severity Scoring**: 0-10 scale with actionable recommendations
 - **Full Audit Trail**: Sentry monitoring + Prometheus metrics
 
-#### **7. Scalability** 📈
+#### **7. Scalability** [SCALE]
 - **Parallel Processing**: 3 agents investigating simultaneously
 - **Cloud-Native**: Auto-scaling via TrueFoundry
 - **Distributed Streaming**: Redpanda handles millions of events/second
@@ -151,39 +151,39 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 
 Anomaly Hunter tracks comprehensive telemetry for continuous improvement:
 
-✅ **Detection Metrics**
+[✓] **Detection Metrics**
 - Total detections processed: 35+
 - Precision, recall, F1 scores per pattern type
 - False positive/negative rates
 
-✅ **Performance Metrics**
+[✓] **Performance Metrics**
 - Response time per detection (avg: 3-5 seconds)
 - Agent-specific confidence scores
 - Severity accuracy
 
-✅ **Cost Metrics**
+[✓] **Cost Metrics**
 - API usage per detection
 - Estimated cost per investigation
 - Monthly/annual projections
 
-✅ **Learning Metrics**
+[✓] **Learning Metrics**
 - Historical pattern recognition via Senso RAG
 - Agent performance trends over time
 - Adaptive weight adjustments
 
-✅ **Business Metrics**
+[✓] **Business Metrics**
 - Time-to-alert latency
 - MTTR reduction
 - Engineering hours saved
 
-✅ **Production Monitoring**
+[✓] **Production Monitoring**
 - Prometheus metrics (via TrueFoundry): inference count, latency histograms
 - Sentry error tracking and event logging
 - Real-time event streaming metrics
 
 ---
 
-## 🏗️ Architecture
+## [ARCH] Architecture
 
 ```
 Data → Airia Workflow → Senso Context → 3 Agents → StackAI Gateway
@@ -199,7 +199,7 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 
 ---
 
-## 📊 Demo
+## [DEMO] Demo
 
 **Input:** CSV with metrics (timestamp, value)
 
@@ -224,12 +224,12 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 [VERDICT] Database connection spike - likely caused by deployment
 [STREAMING] Event published to Redpanda topic 'anomalies'
 [SENTRY] Alert logged with severity=9, tags=[database, spike]
-[VOICE] 🔊 "Attention: Critical anomaly detected..."
+[VOICE] "Attention: Critical anomaly detected..."
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## [TECH] Tech Stack
 
 ### Foundation
 - **Corch Orchestration** - Proven sequential collaboration (73% quality pass rate)
@@ -252,7 +252,7 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 
 ---
 
-## 🏆 Sponsors
+## [SPONSORS] Sponsors
 
 | Sponsor | Role | Integration |
 |---------|------|-------------|
@@ -267,7 +267,7 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 
 ---
 
-## 📁 Project Structure
+## [FILES] Project Structure
 
 ```
 anomaly-hunter/
@@ -304,7 +304,7 @@ anomaly-hunter/
 ---
 
 
-## 🛠️ Setup Instructions
+## [SETUP] Setup Instructions
 
 ### **Step 1: Clone & Install**
 ```bash
@@ -383,7 +383,7 @@ python3 test_realistic_datasets.py
 ```
 
 ---
-## 🔧 Configuration
+## [CONFIG] Configuration
 
 ### Environment Variables
 
@@ -431,7 +431,7 @@ agents:
 
 ---
 
-## 🚢 Deployment
+## [DEPLOY] Deployment
 
 ### Deploy to TrueFoundry
 
@@ -458,7 +458,7 @@ render deploy
 
 ---
 
-## 📚 Documentation
+## [DOCS] Documentation
 
 ### Setup & Configuration
 - [Setup Status](docs/SETUP_STATUS.md) - Initial project setup and tasks completed
@@ -473,7 +473,7 @@ render deploy
 
 ---
 
-## 📖 API Documentation
+## [API] API Documentation
 
 ### REST API
 
@@ -513,7 +513,7 @@ Response:
 
 ---
 
-## 🧪 Testing
+## [TEST] Testing
 
 ```bash
 # Run all tests
@@ -528,7 +528,7 @@ python3 tests/test_integration.py
 
 ---
 
-## 🎬 Demo Script
+## [PRESENT] Demo Script
 
 See [demo/demo_script.md](demo/demo_script.md) for the 2-3 minute presentation flow.
 
@@ -545,7 +545,7 @@ See [demo/demo_script.md](demo/demo_script.md) for the 2-3 minute presentation f
 
 ---
 
-## 🏅 Built With Corch
+## [CORCH] Built With Corch
 
 This project is built on [Corch](https://github.com/bledden/weavehacks-collaborative), a proven sequential AI collaboration framework:
 
@@ -558,11 +558,11 @@ This project is built on [Corch](https://github.com/bledden/weavehacks-collabora
 
 ---
 
-## 🚀 Proposed Future Roadmap
+## [ROADMAP] Proposed Future Roadmap
 
 Anomaly Hunter is production-ready today, but there's significant potential to expand into enterprise-grade reliability platform. Here's what we're considering:
 
-### **1. Enterprise Security & Compliance** 🔒
+### **1. Enterprise Security & Compliance** [SECURE]
 - **SOC 2 Type II Certification**: Audit logging, access controls, security policies
 - **HIPAA Compliance**: PHI data handling, encryption, BAAs with partners
 - **GDPR Compliance**: Data residency, right to deletion, consent management
@@ -570,7 +570,7 @@ Anomaly Hunter is production-ready today, but there's significant potential to e
 - **RBAC & SSO/SAML**: Enterprise authentication and authorization
 - **Air-Gapped Deployment**: On-premise option for regulated industries
 
-### **2. Native Dashboard & Visualization** 📊
+### **2. Native Dashboard & Visualization** [VISUAL]
 - **React/Vue Frontend**: Interactive anomaly timeline and investigation history
 - **Real-Time Monitoring**: Live WebSocket updates as detections occur
 - **Investigation Playback**: Replay agent analysis step-by-step
@@ -578,33 +578,33 @@ Anomaly Hunter is production-ready today, but there's significant potential to e
 - **Alert Management**: Acknowledge, assign, and track remediation
 - **Secure Local Deployment**: Self-hosted dashboard with encrypted storage
 
-### **3. Advanced ML Capabilities** 🧠
+### **3. Advanced ML Capabilities** [ML]
 - **Fine-Tuned Models**: Train on your organization's specific patterns
 - **Predictive Detection**: Forecast anomalies before they occur
 - **Multi-Dimensional Analysis**: Correlate across metrics, logs, and traces
 - **Automated Remediation**: Trigger runbooks based on root cause
 - **Transfer Learning**: Share insights across similar services
 
-### **4. Extended Integrations** 🔗
+### **4. Extended Integrations** [INTEGRATE]
 - **Slack/Teams/Discord**: Rich notifications with investigation context
 - **PagerDuty/OpsGenie**: Intelligent incident routing and escalation
 - **Jira/Linear**: Auto-create tickets with root cause analysis
 - **Grafana/Datadog**: Native plugin for unified observability
 - **Kubernetes Operator**: Deploy as K8s CRD with auto-scaling
 
-### **5. Deployment Options** ☁️
+### **5. Deployment Options** [CLOUD]
 - **Docker/Kubernetes**: Pre-built containers and Helm charts
 - **Serverless**: AWS Lambda/GCP Cloud Run for event-driven workloads
 - **Multi-Tenant SaaS**: Hosted version with organization isolation
 - **Hybrid Mode**: Cloud control plane + on-premise agents
 
-### **6. Operational Improvements** ⚙️
+### **6. Operational Improvements** [OPS]
 - **Zero-Config Setup**: Auto-discover metrics from existing monitoring
 - **Human-in-the-Loop**: Review and correct agent hypotheses
 - **Plugin Architecture**: Extend with custom agents and integrations
 - **A/B Testing**: Compare detection strategies on historical data
 
-### **7. Scale & Performance** 📈
+### **7. Scale & Performance** [PERF]
 - **Horizontal Scaling**: Distributed agent pool for high-volume workloads
 - **Real-Time Streaming**: Sub-second detection on live metrics
 - **Billions of Data Points**: Optimize for massive time-series databases
@@ -612,7 +612,7 @@ Anomaly Hunter is production-ready today, but there's significant potential to e
 
 ---
 
-**📋 Implementation Details**
+**[PLAN] Implementation Details**
 
 For a comprehensive breakdown of the 200+ tasks required to implement these features (no mocks, live and functional), see:
 
@@ -642,13 +642,13 @@ This document includes:
 
 ---
 
-## 📝 License
+## [LICENSE] License
 
 MIT License - see [LICENSE](LICENSE)
 
 ---
 
-## 🤝 Contributing
+## [CONTRIBUTE] Contributing
 
 This is a hackathon project built in 4.5 hours. Contributions welcome!
 
@@ -660,7 +660,7 @@ This is a hackathon project built in 4.5 hours. Contributions welcome!
 
 ---
 
-## 📧 Contact
+## [CONTACT] Contact
 
 Built by **Blake Ledden**
 

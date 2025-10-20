@@ -8,13 +8,13 @@
 
 ## TL;DR
 
-We built **Anomaly Hunter**, a production-ready autonomous anomaly detection system that uses 3 specialized AI agents to investigate data anomalies in parallel. It went from concept to **8/8 sponsor integrations operational**, **35+ real detections processed**, and **98% faster root cause identification** (2 hours -> 5 seconds) in under 48 hours.
+We built **Anomaly Hunter**, a production-ready autonomous anomaly detection system that uses 3 specialized AI agents to investigate data anomalies in parallel. It went from concept to **8/8 sponsor integrations operational**, **35+ real detections processed**, and **98% faster root cause identification** (2 hours → 5 seconds) in under 48 hours.
 
 **Key Results:**
-- [OK] 100% recall on obvious anomalies
-- [OK] 64% average agent confidence across all detections
-- [OK] 195 hours/month of investigation time freed for SREs
-- [OK] Full production stack: OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia
+- ✅ 100% recall on obvious anomalies
+- ✅ 64% average agent confidence across all detections
+- ✅ 195 hours/month of investigation time freed for SREs
+- ✅ Full production stack: OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia
 
 **Try it yourself:** [GitHub - anomaly-hunter](https://github.com/bledden/anomaly-hunter)
 
@@ -208,7 +208,7 @@ See [FLOW_DIAGRAM.md](https://github.com/bledden/anomaly-hunter/blob/main/docs/a
 8. **Score** severity (0-10 scale)
 9. **Stream** event to Redpanda
 10. **Log** to Sentry with custom tags
-11. **Alert** via voice if severity >= 8
+11. **Alert** via voice if severity ≥ 8
 12. **Learn** from detection (autonomous improvement)
 13. **Store** in Senso RAG for future reference
 14. **Return** verdict with confidence scores
@@ -226,7 +226,7 @@ See [FLOW_DIAGRAM.md](https://github.com/bledden/anomaly-hunter/blob/main/docs/a
 
 **What Actually Happened:**
 
-Started with the Corch framework as a foundation. Corch's sequential collaboration pattern (Architect -> Coder -> Reviewer -> Refiner -> Documenter) had a proven 73% quality pass rate, so we adapted it:
+Started with the Corch framework as a foundation. Corch's sequential collaboration pattern (Architect → Coder → Reviewer → Refiner → Documenter) had a proven 73% quality pass rate, so we adapted it:
 
 ```python
 # Original Corch pattern
@@ -242,7 +242,7 @@ agents = [PatternAnalyst, ChangeDetective, RootCauseAgent]
 
 **Hour 6:** Basic 3-agent system working. Detection time: ~8 seconds (too slow).
 
-**Hour 8:** Optimized to parallel execution. Detection time: ~3-5 seconds. [OK]
+**Hour 8:** Optimized to parallel execution. Detection time: ~3-5 seconds. ✅
 
 ### Day 2: Integration Marathon (Hour 9-24)
 
@@ -259,25 +259,25 @@ This was the hardest part. Getting 8 different APIs to work together is... not t
 - Issue: "TrueFoundry not initialized" errors
 - Root cause: Missing `TFY_HOST` environment variable
 - Fix: Added `TFY_HOST=https://app.truefoundry.com` to `.env`
-- Result: Prometheus metrics flowing [OK]
+- Result: Prometheus metrics flowing ✅
 
 **Redpanda (Hour 12-16):**
 - Issue: "Topic authorization failed"
 - Root cause: ACL configured for wrong topic name
 - Fix: Updated code to use `my-topic` (matching existing ACL)
-- Result: Event streaming working [OK]
+- Result: Event streaming working ✅
 
 **Senso (Hour 16-18):**
 - Issue: 401 Unauthorized errors
 - Root cause: Using wrong header (`Authorization` vs `X-API-Key`)
 - Fix: Updated integration to use `X-API-Key: {key}` header
-- Result: RAG queries succeeding [OK]
+- Result: RAG queries succeeding ✅
 
 **ElevenLabs (Hour 18-20):**
 - Issue: Low confidence scores triggering voice alerts too often
 - Root cause: Threshold set to 50%, but early detections had 30-40% confidence
-- Fix: Raised threshold to 70% and severity >= 8
-- Result: Only critical anomalies trigger voice alerts [OK]
+- Fix: Raised threshold to 70% and severity ≥ 8
+- Result: Only critical anomalies trigger voice alerts ✅
 
 **Hour 20-24:** Built 7 realistic demo datasets:
 - Network packet loss
@@ -529,7 +529,7 @@ By automating root cause analysis, you save 1.5 FTE SREs.
 **1. Multi-Agent Systems Need Orchestration**
 
 You can't just throw 3 AI models at a problem and expect coherent output. You need:
-- Clear role definitions (Pattern Analyst != Root Cause Agent)
+- Clear role definitions (Pattern Analyst ≠ Root Cause Agent)
 - Structured output formats (confidence score, finding, evidence)
 - Synthesis step to combine findings
 - Conflict resolution (what if agents disagree?)
@@ -538,7 +538,7 @@ You can't just throw 3 AI models at a problem and expect coherent output. You ne
 
 **2. Parallel > Sequential (When Possible)**
 
-Early versions ran agents sequentially (Pattern -> Change -> Root Cause). This took 12-15 seconds.
+Early versions ran agents sequentially (Pattern → Change → Root Cause). This took 12-15 seconds.
 
 Switching to parallel execution cut detection time to 3-5 seconds (60% reduction).
 
@@ -619,7 +619,7 @@ Track everything:
 
 **9. User Feedback > Your Assumptions**
 
-The business value reframe (ROI -> productivity) came from user feedback. We assumed SRE managers would want to see cost savings. They wanted to see team empowerment.
+The business value reframe (ROI → productivity) came from user feedback. We assumed SRE managers would want to see cost savings. They wanted to see team empowerment.
 
 **Lesson:** Show your work to real users early. They'll tell you what matters.
 
@@ -868,14 +868,14 @@ python3 -m tests.test_integrations
 
 Expected output:
 ```
-[OK] OpenAI: Connected
-[OK] StackAI: Connected
-[OK] TrueFoundry: Initialized
-[OK] Sentry: SDK initialized
-[OK] Redpanda: Producer connected
-[OK] ElevenLabs: API key valid
-[WARNING]  Senso: Not configured (optional)
-[WARNING]  Airia: Not configured (optional)
+✅ OpenAI: Connected
+✅ StackAI: Connected
+✅ TrueFoundry: Initialized
+✅ Sentry: SDK initialized
+✅ Redpanda: Producer connected
+✅ ElevenLabs: API key valid
+⚠️  Senso: Not configured (optional)
+⚠️  Airia: Not configured (optional)
 
 6/6 required integrations operational
 ```
@@ -893,35 +893,35 @@ python3 cli.py detect demo/sample_anomalies.csv
 **Expected output:**
 
 ```
-[SEARCH] Anomaly Hunter - Starting Detection
+🔍 Anomaly Hunter - Starting Detection
 
-[DATA] Loading data from demo/sample_anomalies.csv
-   -> 500 data points loaded (8.3 hours of data)
+📊 Loading data from demo/sample_anomalies.csv
+   → 500 data points loaded (8.3 hours of data)
 
-[BOT] Dispatching to 3 agents...
-   -> Pattern Analyst (GPT-4o-mini)
-   -> Change Detective (Claude 4.5 Sonnet)
-   -> Root Cause Agent (Claude 4.5 Sonnet)
+🤖 Dispatching to 3 agents...
+   → Pattern Analyst (GPT-4o-mini)
+   → Change Detective (Claude 4.5 Sonnet)
+   → Root Cause Agent (Claude 4.5 Sonnet)
 
-[TIME]  Analysis complete in 4.2 seconds
+⏱️  Analysis complete in 4.2 seconds
 
 ╔══════════════════════════════════════════════════════════╗
 ║              ANOMALY DETECTED - Severity 8/10            ║
 ╚══════════════════════════════════════════════════════════╝
 
-[UP] Pattern Analyst (82% confidence):
+📈 Pattern Analyst (82% confidence):
    Statistical spike detected at index 320
    - Value: 250 (baseline: 100 ± 15)
    - Z-score: 10.2σ above mean
    - Pattern: Sudden spike (500% increase in 30 seconds)
 
-[DOWN] Change Detective (85% confidence):
+📉 Change Detective (85% confidence):
    Time-series drift analysis
    - Gradual increase from index 280-320 (40 data points)
    - Rate of change: +3.75 units/minute
    - Correlation with deployment window (5 min prior)
 
-[FIND] Root Cause Agent (78% confidence):
+🔎 Root Cause Agent (78% confidence):
    Dependency graph reasoning
    - Hypothesis: Database connection pool exhaustion
    - Evidence:
@@ -930,15 +930,15 @@ python3 cli.py detect demo/sample_anomalies.csv
      * Recovery time (~2 min) matches pool timeout
    - Recommendation: Check connection pool size & query volume
 
-[TARGET] Verdict (82% avg confidence):
+🎯 Verdict (82% avg confidence):
    Database connection pool likely exhausted during deployment.
    Recommend investigating connection pool configuration.
 
-[STREAM] Streaming: Event published to Redpanda topic 'my-topic'
-[DATA] Monitoring: Alert logged to Sentry (severity=8)
-[AUDIO] Voice Alert: "Attention: Critical anomaly detected in database metrics..."
+📡 Streaming: Event published to Redpanda topic 'my-topic'
+📊 Monitoring: Alert logged to Sentry (severity=8)
+🔊 Voice Alert: "Attention: Critical anomaly detected in database metrics..."
 
-[OK] Detection complete
+✅ Detection complete
 ```
 
 **Step 2: Check Sentry dashboard**
@@ -1027,7 +1027,7 @@ python3 cli.py stats
 
 Output:
 ```
-[DATA] Anomaly Hunter - Learning Statistics
+📊 Anomaly Hunter - Learning Statistics
 
 Detections processed: 25
 Average confidence: 68.4% (+10.2% from first 10)
@@ -1127,7 +1127,7 @@ Current system analyzes single metrics. What about correlating across:
 **Research question:** How do you build a unified anomaly detector that reasons across different data types (time-series, text logs, distributed traces)?
 
 **Potential approach:**
-- Use multimodal embeddings (time-series -> vector space)
+- Use multimodal embeddings (time-series → vector space)
 - Graph neural networks for dependency relationships
 - Transformer models for sequence analysis across data types
 
@@ -1279,7 +1279,7 @@ python3 cli.py detect --metric "spending" --data mint_export.csv
 
 Output:
 ```
-[SEARCH] Anomaly detected in spending
+🔍 Anomaly detected in spending
 Severity: 6/10
 
 Pattern Analyst: $450 spike on 2025-10-15 (baseline: $120/day)
@@ -1361,7 +1361,7 @@ In 48 hours, we went from concept to a production-ready autonomous anomaly detec
 - **8 sponsor integrations** (OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia)
 - **3 specialized AI agents** working in parallel
 - **35+ real detections** processed with measurable learning
-- **98% faster** than manual investigation (2 hours -> 5 seconds)
+- **98% faster** than manual investigation (2 hours → 5 seconds)
 - **195 hours/month** of SRE time freed up (at 100 detections/month)
 
 ### What We Learned
@@ -1392,21 +1392,21 @@ Anomaly Hunter changes the equation:
 
 **Before:**
 ```
-Alert -> Manual investigation (2 hours) -> Root cause -> Fix
+Alert → Manual investigation (2 hours) → Root cause → Fix
 ```
 
 **After:**
 ```
-Alert -> Anomaly Hunter (5 seconds) -> Root cause hypothesis -> Fix
+Alert → Anomaly Hunter (5 seconds) → Root cause hypothesis → Fix
 ```
 
 That's **117 minutes saved per incident**. For a team handling 100 detections/month, that's **195 hours freed up**—nearly 1 FTE's worth of investigation capacity.
 
 **How teams can use that time:**
-- [OK] Handle more scale without hiring
-- [OK] Focus on prevention (postmortems, reliability improvements)
-- [OK] Build better automation
-- [OK] Reduce burnout from toil
+- ✅ Handle more scale without hiring
+- ✅ Focus on prevention (postmortems, reliability improvements)
+- ✅ Build better automation
+- ✅ Reduce burnout from toil
 
 ### Try It Yourself
 
@@ -1454,7 +1454,7 @@ We built this in 48 hours. Imagine what a dedicated team could build in 6 months
 
 ---
 
-*Thanks for reading! If you found this useful, give the repo a [STAR] on GitHub and share with your SRE/DevOps friends.*
+*Thanks for reading! If you found this useful, give the repo a ⭐ on GitHub and share with your SRE/DevOps friends.*
 
 **Built with:** OpenAI, Anthropic Claude, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia
 
@@ -1462,7 +1462,7 @@ We built this in 48 hours. Imagine what a dedicated team could build in 6 months
 
 ---
 
-**[LINK] Resources**
+**📎 Resources**
 
 - [GitHub Repository](https://github.com/bledden/anomaly-hunter)
 - [Interactive Demo](https://bledden.github.io/anomaly-hunter/demo/)
