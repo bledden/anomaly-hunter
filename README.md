@@ -357,13 +357,14 @@ AIRIA_API_KEY=...
 
 ### **Step 3: Setup Third-Party Services**
 
-1. **StackAI**: [Create flows](https://www.stack-ai.com/dashboard) for GPT-5 Pro & Claude 4.5
-2. **TrueFoundry**: [Login via CLI](https://docs.truefoundry.com/docs/quickstart): `tfy login`
-3. **Sentry**: [Create project](https://sentry.io/organizations/new/) and get DSN
-4. **Redpanda**: [Create cluster](https://cloud.redpanda.com) and topic `my-topic`
-5. **ElevenLabs**: [Get API key](https://elevenlabs.io/app/settings/api-keys)
-6. **Senso** (Optional): [Platform access](https://senso.ai)
-7. **Airia** (Optional): [Workflow platform](https://explore.airia.com)
+1. **OpenAI**: [Create API key](https://platform.openai.com/api-keys) for GPT-4o-mini
+2. **StackAI**: [Create flows](https://www.stack-ai.com/dashboard) for Claude 4.5 Sonnet
+3. **TrueFoundry**: [Login via CLI](https://docs.truefoundry.com/docs/quickstart): `tfy login`
+4. **Sentry**: [Create project](https://sentry.io/organizations/new/) and get DSN
+5. **Redpanda**: [Create cluster](https://cloud.redpanda.com) and topic `my-topic`
+6. **ElevenLabs**: [Get API key](https://elevenlabs.io/app/settings/api-keys)
+7. **Senso** (Optional): [Platform access](https://senso.ai)
+8. **Airia** (Optional): [Workflow platform](https://explore.airia.com)
 
 ### **Step 4: Run Tests**
 
@@ -554,6 +555,90 @@ This project is built on [Corch](https://github.com/bledden/weavehacks-collabora
 
 **Corch's Architect → Coder → Reviewer → Refiner → Documenter** becomes:
 **Pattern Analyst → Change Detective → Root Cause → Synthesizer → Reporter**
+
+---
+
+## 🚀 Proposed Future Roadmap
+
+Anomaly Hunter is production-ready today, but there's significant potential to expand into enterprise-grade reliability platform. Here's what we're considering:
+
+### **1. Enterprise Security & Compliance** 🔒
+- **SOC 2 Type II Certification**: Audit logging, access controls, security policies
+- **HIPAA Compliance**: PHI data handling, encryption, BAAs with partners
+- **GDPR Compliance**: Data residency, right to deletion, consent management
+- **Data Residency Options**: EU/US/APAC regions with isolated deployments
+- **RBAC & SSO/SAML**: Enterprise authentication and authorization
+- **Air-Gapped Deployment**: On-premise option for regulated industries
+
+### **2. Native Dashboard & Visualization** 📊
+- **React/Vue Frontend**: Interactive anomaly timeline and investigation history
+- **Real-Time Monitoring**: Live WebSocket updates as detections occur
+- **Investigation Playback**: Replay agent analysis step-by-step
+- **Custom Dashboards**: Build views for different teams (SRE, Dev, Ops)
+- **Alert Management**: Acknowledge, assign, and track remediation
+- **Secure Local Deployment**: Self-hosted dashboard with encrypted storage
+
+### **3. Advanced ML Capabilities** 🧠
+- **Fine-Tuned Models**: Train on your organization's specific patterns
+- **Predictive Detection**: Forecast anomalies before they occur
+- **Multi-Dimensional Analysis**: Correlate across metrics, logs, and traces
+- **Automated Remediation**: Trigger runbooks based on root cause
+- **Transfer Learning**: Share insights across similar services
+
+### **4. Extended Integrations** 🔗
+- **Slack/Teams/Discord**: Rich notifications with investigation context
+- **PagerDuty/OpsGenie**: Intelligent incident routing and escalation
+- **Jira/Linear**: Auto-create tickets with root cause analysis
+- **Grafana/Datadog**: Native plugin for unified observability
+- **Kubernetes Operator**: Deploy as K8s CRD with auto-scaling
+
+### **5. Deployment Options** ☁️
+- **Docker/Kubernetes**: Pre-built containers and Helm charts
+- **Serverless**: AWS Lambda/GCP Cloud Run for event-driven workloads
+- **Multi-Tenant SaaS**: Hosted version with organization isolation
+- **Hybrid Mode**: Cloud control plane + on-premise agents
+
+### **6. Operational Improvements** ⚙️
+- **Zero-Config Setup**: Auto-discover metrics from existing monitoring
+- **Human-in-the-Loop**: Review and correct agent hypotheses
+- **Plugin Architecture**: Extend with custom agents and integrations
+- **A/B Testing**: Compare detection strategies on historical data
+
+### **7. Scale & Performance** 📈
+- **Horizontal Scaling**: Distributed agent pool for high-volume workloads
+- **Real-Time Streaming**: Sub-second detection on live metrics
+- **Billions of Data Points**: Optimize for massive time-series databases
+- **Edge Deployment**: Run agents closer to data sources
+
+---
+
+**📋 Implementation Details**
+
+For a comprehensive breakdown of the 200+ tasks required to implement these features (no mocks, live and functional), see:
+
+**[Future Roadmap Implementation Plan](docs/guides/FUTURE_ROADMAP_IMPLEMENTATION_PLAN.md)**
+
+This document includes:
+- Detailed technical requirements for each feature
+- Integration dependencies and prerequisites
+- Compliance certification processes (SOC 2, HIPAA, GDPR)
+- Infrastructure and deployment architecture
+- Estimated complexity and parallelization opportunities
+
+**Quick Wins** (2-6 weeks each):
+- Slack/PagerDuty/Jira integrations
+- Docker containerization
+- Basic dashboard (read-only)
+
+**Strategic Investments** (3-12 months):
+- SOC 2 Type II certification
+- Full-featured dashboard with RBAC
+- Multi-tenant SaaS architecture
+
+**Long-Term Vision** (12-24 months):
+- HIPAA compliance
+- Fine-tuned organization-specific models
+- Automated remediation capabilities
 
 ---
 

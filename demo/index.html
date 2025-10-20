@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Hunter - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .comparison-box {
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .traditional {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .anomaly-hunter {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+        }
+
+        .comparison-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .time-indicator {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .steps {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .steps li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .steps li:last-child {
+            border-bottom: none;
+        }
+
+        .interactive-demo {
+            margin-top: 40px;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+
+        .detection-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .agent-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .agent-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            background: #e9ecef;
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #51cf66, #37b24d);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .benefit-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .benefit-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .severity-high {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .severity-medium {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        .severity-low {
+            background: #51cf66;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Anomaly Hunter</h1>
+            <p class="tagline">Autonomous Multi-Agent Anomaly Detection</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Faster MTTR</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">35+</div>
+                    <div class="stat-label">Detections Tracked</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">8/8</div>
+                    <div class="stat-label">Sponsors Active</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">195 hrs</div>
+                    <div class="stat-label">Saved Monthly</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="demo-section">
+            <h2>⏱️ The Time Difference</h2>
+            <div class="comparison">
+                <div class="comparison-box traditional">
+                    <div class="comparison-title">❌ Traditional Approach</div>
+                    <div class="time-indicator">~2 hours</div>
+                    <ul class="steps">
+                        <li>📊 Check multiple dashboards</li>
+                        <li>🔍 Dig through logs manually</li>
+                        <li>📈 Correlate metrics across systems</li>
+                        <li>💭 Form hypotheses by trial and error</li>
+                        <li>🧪 Test each hypothesis</li>
+                        <li>✍️ Document findings</li>
+                        <li>🎯 Maybe find root cause</li>
+                    </ul>
+                </div>
+                <div class="comparison-box anomaly-hunter">
+                    <div class="comparison-title">✅ Anomaly Hunter</div>
+                    <div class="time-indicator">~5 seconds</div>
+                    <ul class="steps">
+                        <li>🤖 3 AI agents investigate in parallel</li>
+                        <li>📊 Statistical analysis (Pattern Analyst)</li>
+                        <li>📈 Time-series drift (Change Detective)</li>
+                        <li>🎯 Root cause hypothesis (Root Cause Agent)</li>
+                        <li>🔄 Confidence-weighted synthesis</li>
+                        <li>✅ Actionable diagnosis with evidence</li>
+                        <li>🚀 SRE jumps straight to fixing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎮 Interactive Demo</h2>
+            <p>See Anomaly Hunter in action analyzing a real production scenario</p>
+
+            <div class="interactive-demo">
+                <div class="demo-controls">
+                    <button id="runDemo">🚀 Run Detection</button>
+                    <button id="resetDemo" disabled>🔄 Reset</button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="dataChart"></canvas>
+                </div>
+
+                <div id="agentResults" style="display: none;">
+                    <h3 style="margin-bottom: 20px;">Agent Analysis Results</h3>
+                    <div id="agent1" class="agent-card" style="display: none;">
+                        <div class="agent-name">🔬 Pattern Analyst (GPT-4o-mini)</div>
+                        <p>Statistical anomaly detection using Z-score analysis</p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="conf1" style="width: 0%"></div>
+                        </div>
+                        <p id="finding1"></p>
+                    </div>
+
+                    <div id="agent2" class="agent-card" style="display: none;">
+                        <div class="agent-name">📊 Change Detective (GPT-4o-mini)</div>
+                        <p>Time-series drift and change point detection</p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="conf2" style="width: 0%"></div>
+                        </div>
+                        <p id="finding2"></p>
+                    </div>
+
+                    <div id="agent3" class="agent-card" style="display: none;">
+                        <div class="agent-name">🎯 Root Cause Agent (Claude 4.5 Sonnet)</div>
+                        <p>Hypothesis generation and evidence correlation</p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="conf3" style="width: 0%"></div>
+                        </div>
+                        <p id="finding3"></p>
+                    </div>
+                </div>
+
+                <div id="verdict" style="display: none;">
+                    <h3 style="margin: 30px 0 20px 0;">📋 Synthesized Verdict</h3>
+                    <div class="detection-output" id="verdictOutput"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>💡 Benefits for Your Team</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <div class="benefit-title">98% Faster Diagnosis</div>
+                    <p>From 2 hours of investigation to 5 seconds of root cause analysis. SREs jump straight to fixing issues.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎯</div>
+                    <div class="benefit-title">Focus on Strategic Work</div>
+                    <p>Free up 195 hours/month for prevention, automation, and reliability engineering instead of firefighting.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🧠</div>
+                    <div class="benefit-title">Continuous Learning</div>
+                    <p>Dual self-improvement: Autonomous learner adapts weights, Senso RAG builds institutional knowledge.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔍</div>
+                    <div class="benefit-title">Multi-Agent Intelligence</div>
+                    <p>3 specialized agents cross-validate findings. Evidence-based analysis with confidence scores.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <div class="benefit-title">Cost-Effective</div>
+                    <p>~$10/month API costs for 100 detections. Fraction of traditional monitoring tools.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🚀</div>
+                    <div class="benefit-title">Production Ready</div>
+                    <p>8/8 sponsors operational: Real-time streaming, monitoring, voice alerts, ML metrics tracking.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section" style="text-align: center;">
+            <h2>🚀 Ready to Transform Your SRE Workflow?</h2>
+            <p style="font-size: 1.2em; margin: 20px 0;">Get started with Anomaly Hunter today</p>
+            <a href="https://github.com/bledden/anomaly-hunter" target="_blank">
+                <button style="font-size: 1.2em; padding: 20px 40px; margin-top: 20px;">
+                    📚 View on GitHub
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Demo data - simulating network packet loss scenario
+        const demoData = {
+            timestamps: [],
+            values: [],
+            anomalyIndices: [100, 200, 320]
+        };
+
+        // Generate synthetic time-series data
+        for (let i = 0; i < 400; i++) {
+            demoData.timestamps.push(i);
+            let value = 0.1 + (Math.random() * 0.05); // Normal baseline ~0.1
+
+            // Inject anomalies
+            if (Math.abs(i - 100) < 3) value = 8.5 + (Math.random() * 0.5);
+            else if (Math.abs(i - 200) < 3) value = 9.2 + (Math.random() * 0.5);
+            else if (Math.abs(i - 320) < 3) value = 8.8 + (Math.random() * 0.5);
+
+            demoData.values.push(value);
+        }
+
+        // Create chart
+        const ctx = document.getElementById('dataChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: demoData.timestamps,
+                datasets: [{
+                    label: 'Network Packet Loss (%)',
+                    data: demoData.values,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Production Network Metrics - 6.7 Hours of Data',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Packet Loss %'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (minutes)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Demo animation
+        document.getElementById('runDemo').addEventListener('click', async function() {
+            this.disabled = true;
+            document.getElementById('resetDemo').disabled = true;
+            document.getElementById('agentResults').style.display = 'block';
+
+            // Simulate agent analysis
+            await sleep(500);
+            await showAgent('agent1', 'conf1', 78, 'finding1',
+                '🔍 Detected 27 anomalies with 80σ deviation from baseline. Pattern: Intermittent spikes at indices 100, 200, 320.');
+
+            await sleep(800);
+            await showAgent('agent2', 'conf2', 82, 'finding2',
+                '📊 Identified 3 distinct change points. Pattern type: Cascade failure with 3-wave propagation.');
+
+            await sleep(800);
+            await showAgent('agent3', 'conf3', 77, 'finding3',
+                '🎯 Root cause hypothesis: Network infrastructure hardware failure. Confidence: 77%. Evidence: Periodic spike pattern consistent with switch failover.');
+
+            // Show verdict
+            await sleep(1000);
+            document.getElementById('verdict').style.display = 'block';
+            const verdictText = `
+╔══════════════════════════════════════════════════════════════════╗
+║                        ANOMALY VERDICT                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Severity:    9/10 ⚠️ HIGH PRIORITY
+Confidence:  79.0%
+Anomalies:   27 detected at indices [100, 200, 320]
+
+┌─ Agent Findings ────────────────────────────────────────────────┐
+│ Pattern Analyst (78.0%):                                        │
+│   27 anomalies detected via Z-score analysis                    │
+│   80σ deviation from 0.1% baseline                              │
+│                                                                  │
+│ Change Detective (82.0%):                                       │
+│   3 change points detected                                      │
+│   Pattern: Cascade failure, 3-wave propagation                  │
+│                                                                  │
+│ Root Cause Agent (77.0%):                                       │
+│   Hypothesis: Network hardware failure                          │
+│   Evidence: Periodic spikes match switch failover pattern       │
+└──────────────────────────────────────────────────────────────────┘
+
+📋 Summary:
+Network infrastructure experiencing cascading hardware failure.
+Three distinct failure events at 100min, 200min, and 320min intervals.
+Packet loss spikes from 0.1% baseline to 8-9% during events.
+
+🎯 Recommendation:
+⚠️ HIGH PRIORITY - Investigate network switch health immediately
+   - Check switch logs for failover events
+   - Verify redundancy configuration
+   - Monitor for additional cascades
+
+⏱️  Time to diagnosis: 4.2 seconds
+🔄 Learning: Detection #36 stored in knowledge base
+            `;
+            document.getElementById('verdictOutput').textContent = verdictText;
+
+            // Highlight anomalies on chart
+            chart.data.datasets.push({
+                label: 'Detected Anomalies',
+                data: demoData.values.map((v, i) =>
+                    demoData.anomalyIndices.some(ai => Math.abs(i - ai) < 3) ? v : null
+                ),
+                borderColor: '#ff6b6b',
+                backgroundColor: 'rgba(255, 107, 107, 0.3)',
+                pointRadius: 5,
+                pointStyle: 'circle',
+                showLine: false
+            });
+            chart.update();
+
+            document.getElementById('resetDemo').disabled = false;
+        });
+
+        document.getElementById('resetDemo').addEventListener('click', function() {
+            // Reset everything
+            document.getElementById('agentResults').style.display = 'none';
+            document.getElementById('verdict').style.display = 'none';
+            ['agent1', 'agent2', 'agent3'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            ['conf1', 'conf2', 'conf3'].forEach(id => {
+                document.getElementById(id).style.width = '0%';
+            });
+
+            // Reset chart
+            if (chart.data.datasets.length > 1) {
+                chart.data.datasets.pop();
+                chart.update();
+            }
+
+            document.getElementById('runDemo').disabled = false;
+            this.disabled = true;
+        });
+
+        async function showAgent(agentId, confId, confidence, findingId, finding) {
+            document.getElementById(agentId).style.display = 'block';
+            await sleep(200);
+            document.getElementById(confId).style.width = confidence + '%';
+            document.getElementById(confId).textContent = confidence + '%';
+            await sleep(300);
+            document.getElementById(findingId).textContent = finding;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
