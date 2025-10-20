@@ -42,8 +42,8 @@ class StackAIGateway:
 
         # Flow routing map - maps model names to Stack AI flow IDs
         self.flow_map = {
-            "openai/gpt-5-pro": "68f2bece9e2d263db0c93aa3",            # Pattern Analyst flow (GPT-5 Pro)
-            "anthropic/claude-sonnet-4-5": "68f2c162c148d3edaa517114",  # Root Cause flow (Claude 4.5 Sonnet)
+            # "openai/gpt-5-pro": "68f2bece9e2d263db0c93aa3",            # Pattern Analyst flow (DISABLED - too slow, 5+ min timeout)
+            "anthropic/claude-sonnet-4-5": "68f2c162c148d3edaa517114",  # Root Cause flow (Claude 4.5 Sonnet) - FAST!
         }
 
         self.base_url = "https://api.stack-ai.com/inference/v0"

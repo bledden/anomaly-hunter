@@ -116,7 +116,7 @@ class ElevenLabsVoice:
 
         message = f"""
         Alert! {severity_label} severity anomaly detected.
-        Confidence level: {confidence:.0f} percent.
+        Confidence level: {confidence * 100:.0f} percent.
         Finding: {key_finding}.
         Immediate investigation required.
         """

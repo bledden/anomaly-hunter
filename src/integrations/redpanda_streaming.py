@@ -54,7 +54,7 @@ class RedpandaStreaming:
         except Exception as e:
             print(f"[ERROR] Redpanda initialization failed: {e}")
 
-    def publish_anomaly_event(self, verdict: Any, topic: str = "anomaly-hunter-events") -> bool:
+    def publish_anomaly_event(self, verdict: Any, topic: str = "my-topic") -> bool:
         """
         Publish anomaly detection event to Redpanda
 

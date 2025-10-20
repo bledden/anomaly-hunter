@@ -50,7 +50,11 @@ class TrueFoundryDeployment:
 
             # Create ML repo if it doesn't exist
             try:
-                self.client.create_ml_repo(self.ml_repo)
+                # storage_integration_fqn=None uses default storage
+                self.client.create_ml_repo(
+                    name=self.ml_repo,
+                    storage_integration_fqn=None  # Use default storage
+                )
             except Exception as e:
                 # Repo might already exist - that's okay
                 if "already exists" not in str(e).lower():

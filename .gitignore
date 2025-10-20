@@ -27,11 +27,15 @@ ENV/
 env/
 .venv
 
-# Environment Variables
+# Environment Variables - ALL variants
 .env
 .env.local
+.env.production
+.env.development
+.env.test
 .env.*.local
 *.env
+!.env.example  # Allow template to be tracked
 
 # IDE
 .vscode/
@@ -84,6 +88,15 @@ tfy-config/
 *.mp3
 *.wav
 audio_output/
+anomaly_alert.mp3
+
+# Credentials & Keys (extra safety)
+*_credentials.json
+*_key.json
+*.pem
+*.key
+**/credentials/
+secrets/
 
 # Temporary
 tmp/

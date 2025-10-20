@@ -51,7 +51,7 @@ class SensoRAG:
         try:
             # Query Senso search endpoint (correct API structure)
             headers = {
-                "Authorization": f"Bearer {self.api_key}",
+                "X-API-Key": self.api_key,  # Senso uses X-API-Key, not Bearer token
                 "Content-Type": "application/json"
             }
 
@@ -116,7 +116,7 @@ class SensoRAG:
 
         try:
             headers = {
-                "Authorization": f"Bearer {self.api_key}",
+                "X-API-Key": self.api_key,  # Senso uses X-API-Key, not Bearer token
                 "Content-Type": "application/json"
             }
 
@@ -140,7 +140,7 @@ class SensoRAG:
                 timeout=10
             )
 
-            if response.status_code in [200, 201]:
+            if response.status_code in [200, 201, 202]:  # 202 = Accepted (async processing)
                 print(f"[SENSO] 💾 Stored anomaly in knowledge base")
                 print(f"[SENSO]   └─ Action: Added severity {verdict.severity}/10 case to RAG for future learning")
                 return True
