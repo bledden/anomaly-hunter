@@ -654,6 +654,166 @@ Anomaly Hunter is production-ready today, but there's significant potential to e
 - **Billions of Data Points**: Optimize for massive time-series databases
 - **Edge Deployment**: Run agents closer to data sources
 
+### **8. Facilitair Platform Integration** [PLATFORM]
+
+**Vision**: Transform Anomaly Hunter from a standalone tool into a flagship service within the Facilitair ecosystem - a multi-agent collaboration platform for enterprise reliability.
+
+#### **Integration Architecture**
+
+**Anomaly Hunter as a Facilitair Service:**
+- **Multi-Agent Marketplace**: Publish the 3 anomaly detection agents (Pattern Analyst, Change Detective, Root Cause) to Facilitair's agent registry
+- **Composable Workflows**: Allow users to combine Anomaly Hunter agents with other Facilitair agents (e.g., incident response, automated remediation, cost optimization agents)
+- **Shared Knowledge Graph**: Senso RAG becomes part of Facilitair's centralized knowledge base, enabling cross-service learning
+- **Unified Orchestration**: Leverage Facilitair's Corch framework for advanced multi-agent coordination beyond simple parallel execution
+
+#### **Technical Integration Points**
+
+**Reference Implementation:** Based on proven Corch framework (weavehacks-collaborative) which achieved 73% pass rate and +36.8% quality improvement with sequential multi-agent collaboration.
+
+**1. Agent Registry Integration**
+- **Publish agents to Facilitair marketplace** with standardized Corch-compatible interfaces
+- **Leverage existing 5-stage pipeline**: Integrate Anomaly Hunter agents as specialized modules within Architect → Coder → Reviewer → Refiner → Documenter workflow
+- **Version control and rollback**: Use Facilitair v2's project management system for agent versioning
+- **Usage analytics**: Track which organizations use which agents via Supabase task_history table
+- **Agent composition**: Users can fork and customize agents (similar to Corch's modular agent design)
+- **Quality evaluation**: Leverage Corch's 6-dimension quality system (Correctness 30%, Completeness 25%, Code Quality 20%, Documentation 10%, Error Handling 10%, Testing 5%)
+
+**2. Knowledge Sharing Ecosystem**
+- **Cross-Service RAG**: Anomaly Hunter's Senso detections feed into Facilitair's central knowledge base
+- **Pattern Marketplace**: Organizations can optionally share anonymized anomaly patterns
+- **Transfer Learning**: Healthcare anomaly patterns help bootstrap manufacturing deployments
+- **Collective Intelligence**: 1,000 organizations' detections improve everyone's accuracy
+
+**3. Unified Authentication & Billing**
+- **Single Sign-On**: Facilitair v2's Supabase Auth integration for all services
+- **User Profile System**: Leverage existing `profiles` table with avatar, name, email
+- **Project Management**: Store anomaly detection sessions in `projects` table with public/private visibility
+- **Usage-Based Billing**: Pay per detection tracked in `task_history` table with cost/latency metrics
+- **Enterprise Licensing**: Site licenses for unlimited detections
+- **API Key Management**: Centralized sponsor credential storage (OpenAI, StackAI, Senso, etc.) in Supabase secrets
+- **Edge Functions**: Deploy Anomaly Hunter detection API as Supabase Edge Function alongside Facilitair v2's existing functions
+
+**4. Advanced Orchestration**
+- **Complex Workflows**: "When anomaly detected → Run remediation agent → Update runbook → Notify team"
+- **Multi-Agent Consensus**: Combine Anomaly Hunter with Facilitair security agents for threat correlation
+- **Agent Specialization**: Route healthcare data to healthcare-tuned agents, financial to finance-tuned
+- **Quality Assurance**: Facilitair's validation agents review Anomaly Hunter verdicts before escalation
+
+#### **Benefits of Platform Integration**
+
+**For Users:**
+- **One Platform, Many Services**: Anomaly detection + incident response + cost optimization + security analysis
+- **Better Accuracy**: Cross-service learning means manufacturing detections improve over time from finance patterns
+- **Simplified Procurement**: One vendor relationship instead of multiple point solutions
+- **Unified Interface**: Learn one platform, access all reliability services
+- **Ecosystem Effects**: As more services join Facilitair, Anomaly Hunter gets smarter
+
+**For Facilitair:**
+- **Proven Reference Implementation**: Anomaly Hunter demonstrates platform capabilities with real production data (62 detections, 100% success)
+- **Revenue Diversification**: SaaS subscriptions, API usage fees, enterprise licensing
+- **Network Effects**: Each new detection improves the platform for all users
+- **Moat Building**: Collective knowledge graph becomes harder to replicate over time
+- **Research Validation**: Multi-agent paper has empirical data from production workloads
+
+**For Anomaly Hunter:**
+- **Distribution**: Access to Facilitair's customer base immediately
+- **Reduced Infrastructure Costs**: Leverage shared platform services (auth, billing, monitoring)
+- **Faster Feature Development**: Reuse Facilitair components instead of building from scratch
+- **Enterprise Credibility**: Part of a SOC 2/HIPAA compliant platform vs standalone tool
+- **Agent Collaboration**: Combine with specialized agents (e.g., Kubernetes remediation agent)
+
+#### **Migration Path**
+
+**Phase 1: Service Wrapper (2-4 weeks)**
+- **Package Anomaly Hunter as Facilitair-compatible service**
+  - Create Next.js API route: `/app/api/detect-anomaly/route.ts`
+  - Integrate with Facilitair v2's existing React/Next.js frontend
+  - Add "Anomaly Detection" workspace to ChatWorkspace component
+- **Expose REST API endpoints** matching Facilitair service spec
+  - POST `/api/detect-anomaly` - Run detection
+  - GET `/api/anomalies/:id` - Get detection results
+  - GET `/api/anomalies` - List user's detections
+- **Implement authentication bridge**
+  - Use Facilitair v2's Supabase Auth (`utils/supabase/client.tsx`)
+  - User sessions automatically tracked via profiles table
+- **Basic telemetry integration**
+  - Log detections to `task_history` table (cost, latency, routing results)
+  - Add Weave traces to Facilitair's W&B project
+
+**Phase 2: Agent Decomposition (1-2 months)**
+- Refactor 3 agents to implement Facilitair Agent Interface
+- Publish to internal agent registry
+- Enable agent composition (users can swap Pattern Analyst for custom agent)
+- Migrate Senso RAG to Facilitair Knowledge Base API
+
+**Phase 3: Advanced Orchestration (2-3 months)**
+- Replace local orchestrator with Facilitair Corch framework
+- Enable complex multi-agent workflows
+- Implement agent marketplace features (forking, versioning, analytics)
+- Add cross-service knowledge sharing
+
+**Phase 4: Full Platform Integration (3-6 months)**
+- Unified billing and usage tracking
+- Enterprise features (RBAC, audit logging, compliance)
+- Multi-tenant isolation
+- SLA guarantees and support tiers
+
+#### **Business Model Options**
+
+**1. Freemium SaaS**
+- Free tier: 100 detections/month, single user
+- Pro tier: $99/month for 1,000 detections, 5 users
+- Enterprise tier: Custom pricing, unlimited detections, dedicated support
+
+**2. Usage-Based Pricing**
+- $0.10 per detection (100x markup on API costs for margin)
+- Volume discounts at 10K, 100K, 1M+ detections/month
+- Bundled with other Facilitair services for discount
+
+**3. Platform Revenue Share**
+- Facilitair takes 20-30% platform fee
+- Anomaly Hunter retains 70-80% of revenue
+- In exchange: distribution, infrastructure, support, compliance
+
+**4. Enterprise Licensing**
+- Site license: $50K/year for unlimited detections
+- Includes all Facilitair platform services
+- Dedicated success manager and custom agent development
+
+#### **Competitive Advantages**
+
+**vs. Traditional Monitoring (Datadog, New Relic):**
+- AI-native root cause analysis (not just alerting)
+- Domain-agnostic (works across industries without reconfiguration)
+- Multi-agent consensus reduces false positives
+
+**vs. AI Monitoring (Mona, Arize):**
+- Multi-agent architecture (not single-model)
+- Production-proven across 5 industries
+- Open agent marketplace (users can customize)
+
+**vs. Point Solutions:**
+- Part of larger reliability platform (ecosystem effects)
+- Cross-domain knowledge sharing
+- One vendor, many use cases
+
+#### **Success Metrics**
+
+**Platform Adoption:**
+- 1,000 organizations within 12 months
+- 1M+ detections processed monthly across platform
+- 100+ agents published to marketplace
+
+**Business Metrics:**
+- $1M ARR within 18 months
+- 80%+ gross margin (low infrastructure costs)
+- <5% monthly churn
+
+**Technical Metrics:**
+- 99.9% service uptime
+- <100ms p99 detection latency
+- 90%+ detection accuracy (validated by user feedback)
+
 ---
 
 **[PLAN] Implementation Details**
