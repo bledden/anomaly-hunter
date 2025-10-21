@@ -22,12 +22,12 @@ Anomaly Hunter autonomously detects and investigates data anomalies using 3 spec
 
 **Result:** Real-time anomaly detection with confidence-scored root cause analysis.
 
-### [✓] Validated Performance
-- [✓] **100% Detection Rate** across 15 real-world scenarios (5 domains)
-- [✓] **75.6% Average Confidence** across all scenarios
-- [✓] **60+ Detections** processed through autonomous learning
-- [✓] **9/9 Sponsor integrations** fully operational
-- [✓] **22ms Average Detection Time** - real-time capable
+### [OK] Validated Performance
+- [OK] **100% Detection Rate** across 15 real-world scenarios (5 domains)
+- [OK] **75.6% Average Confidence** across all scenarios
+- [OK] **60+ Detections** processed through autonomous learning
+- [OK] **9/9 Sponsor integrations** fully operational
+- [OK] **22ms Average Detection Time** - real-time capable
 
 **Domain-Specific Performance:**
 - Financial: 80.0% confidence (fraud, flash crashes, account takeover)
@@ -188,32 +188,32 @@ See [evaluations/DOMAIN_EVALUATION_REPORT.md](evaluations/DOMAIN_EVALUATION_REPO
 
 Anomaly Hunter tracks comprehensive telemetry for continuous improvement:
 
-[✓] **Detection Metrics**
+[OK] **Detection Metrics**
 - Total detections processed: 40+
 - Precision, recall, F1 scores per pattern type
 - False positive/negative rates
 
-[✓] **Performance Metrics**
+[OK] **Performance Metrics**
 - Response time per detection (avg: 3-5 seconds)
 - Agent-specific confidence scores
 - Severity accuracy
 
-[✓] **Cost Metrics**
+[OK] **Cost Metrics**
 - API usage per detection
 - Estimated cost per investigation
 - Monthly/annual projections
 
-[✓] **Learning Metrics**
+[OK] **Learning Metrics**
 - Historical pattern recognition via Senso RAG
 - Agent performance trends over time
 - Adaptive weight adjustments
 
-[✓] **Business Metrics**
+[OK] **Business Metrics**
 - Time-to-alert latency
 - MTTR reduction
 - Engineering hours saved
 
-[✓] **Production Monitoring**
+[OK] **Production Monitoring**
 - Prometheus metrics (via TrueFoundry): inference count, latency histograms
 - Sentry error tracking and event logging
 - Real-time event streaming metrics
@@ -854,7 +854,7 @@ MIT License - see [LICENSE](LICENSE)
 
 ## [CONTRIBUTE] Contributing
 
-This is a hackathon project built in 4.5 hours. Contributions welcome!
+Contributions welcome!
 
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing`)
@@ -869,7 +869,8 @@ This is a hackathon project built in 4.5 hours. Contributions welcome!
 Built by **Blake Ledden**
 
 - GitHub: [@bledden](https://github.com/bledden)
-- X: [@blakeledden](https://x.com/blakeledden)
+- LinkedIn: [Blake Ledden](https://www.linkedin.com/in/blakeledden/)
+- Threads: [@ekalbbackwards](https://www.threads.com/@ekalbbackwards)
 - Email: blake@facilitair.ai
 
 ---
