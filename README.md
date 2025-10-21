@@ -639,6 +639,12 @@ Anomaly Hunter is production-ready today, but there's significant potential to e
 ### **6. Operational Improvements** [OPS]
 - **Zero-Config Setup**: Auto-discover metrics from existing monitoring
 - **Human-in-the-Loop**: Review and correct agent hypotheses
+- **User Feedback & Actionability Tracking**:
+  - Session-based feedback system to track whether detections were actionable
+  - Follow-up prompts on return: "Do you have time to provide feedback on Detection #47?"
+  - Actionability metrics: % of detections that led to mitigation actions
+  - Integration with learning engine to prioritize patterns that led to real fixes
+  - CLI/dashboard toggle: "Quick start" vs "Provide feedback from last session"
 - **Plugin Architecture**: Extend with custom agents and integrations
 - **A/B Testing**: Compare detection strategies on historical data
 
