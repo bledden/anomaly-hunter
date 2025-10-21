@@ -7,6 +7,12 @@ import numpy as np
 from typing import Dict, Any, Optional
 from scipy import stats
 
+# Import Weave decorator from orchestrator
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from orchestrator import weave_op_if_available
+
 
 class PatternAnalyst:
     """
@@ -31,6 +37,7 @@ class PatternAnalyst:
         self.model = "openai/gpt-5-pro"  # GPT-5 Pro via Stack AI
         self.name = "pattern_analyst"
 
+    @weave_op_if_available()
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze data for statistical anomalies

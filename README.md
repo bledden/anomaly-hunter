@@ -264,6 +264,7 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 | [Redpanda](https://redpanda.com) | Event Streaming | Real-time anomaly events |
 | [Sentry](https://sentry.io) | App Monitoring | Error tracking, custom metrics |
 | [ElevenLabs](https://elevenlabs.io) | Voice Synthesis | Audio alerts |
+| [Weave](https://wandb.ai/site/weave) | LLM Observability | Token tracking, prompt versioning, evaluations |
 
 ---
 

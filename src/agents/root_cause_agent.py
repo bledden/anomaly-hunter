@@ -6,6 +6,12 @@ Role: Hypothesis generation and root cause analysis using o1-mini
 import numpy as np
 from typing import Dict, Any, Optional, List
 
+# Import Weave decorator from orchestrator
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from orchestrator import weave_op_if_available
+
 
 class RootCauseAgent:
     """
@@ -30,6 +36,7 @@ class RootCauseAgent:
         self.model = "anthropic/claude-sonnet-4-5"  # Claude 4.5 Sonnet via Stack AI
         self.name = "root_cause"
 
+    @weave_op_if_available()
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze root cause of anomalies

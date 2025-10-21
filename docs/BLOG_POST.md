@@ -8,13 +8,13 @@
 
 ## TL;DR
 
-We built **Anomaly Hunter**, a production-ready autonomous anomaly detection system that uses 3 specialized AI agents to investigate data anomalies in parallel. It went from concept to **8/8 sponsor integrations operational**, **35+ real detections processed**, and **98% faster root cause identification** (2 hours -> 5 seconds) in under 48 hours.
+We built **Anomaly Hunter**, a production-ready autonomous anomaly detection system that uses 3 specialized AI agents to investigate data anomalies in parallel. It went from concept to **9/9 sponsor integrations operational**, **35+ real detections processed**, and **98% faster root cause identification** (2 hours -> 5 seconds) in under 48 hours.
 
 **Key Results:**
 - [OK] 100% recall on obvious anomalies
 - [OK] 64% average agent confidence across all detections
 - [OK] 195 hours/month of investigation time freed for SREs
-- [OK] Full production stack: OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia
+- [OK] Full production stack: OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia, Weave
 
 **Try it yourself:** [GitHub - anomaly-hunter](https://github.com/bledden/anomaly-hunter)
 
@@ -247,13 +247,13 @@ agents = [PatternAnalyst, ChangeDetective, RootCauseAgent]
 ### Day 2: Integration Marathon (Hour 9-24)
 
 **Goals:**
-- Integrate all 8 sponsors
+- Integrate all 9 sponsors
 - Build production monitoring
 - Create demo datasets
 
 **What Actually Happened:**
 
-This was the hardest part. Getting 8 different APIs to work together is... not trivial.
+This was the hardest part. Getting 9 different APIs to work together is... not trivial.
 
 **TrueFoundry (Hour 9-12):**
 - Issue: "TrueFoundry not initialized" errors
@@ -348,7 +348,7 @@ The system *is* learning. Slowly, but measurably.
 **Hour 37-40:** README overhaul
 - Added real performance metrics (35+ detections, 64% avg confidence)
 - Created business value section focused on **productivity** (195 hrs/month freed) rather than cost savings
-- Added setup instructions with hyperlinks to all 8 sponsor platforms
+- Added setup instructions with hyperlinks to all 9 sponsor platforms
 
 **Hour 40-42:** Documentation organization
 - Created dated test results folders (`results/2025-10-20/`)
@@ -727,7 +727,7 @@ Some of this was scope creep. But it was *intentional* scope creep to build some
 
 - Python 3.9+
 - Git
-- API keys for 8 sponsors (6 required, 2 optional)
+- API keys for 9 sponsors (6 required, 3 optional)
 
 ### Part 1: Clone & Setup (5 minutes)
 
@@ -1358,7 +1358,7 @@ Monitor local weather patterns:
 
 In 48 hours, we went from concept to a production-ready autonomous anomaly detection system:
 
-- **8 sponsor integrations** (OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia)
+- **9 sponsor integrations** (OpenAI, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia, Weave)
 - **3 specialized AI agents** working in parallel
 - **35+ real detections** processed with measurable learning
 - **98% faster** than manual investigation (2 hours -> 5 seconds)
@@ -1423,9 +1423,9 @@ The entire system is open source and free to run (with free tier API credits):
 - API keys for 6 services (all have free tiers)
 - CSV with your metrics (or use our demo data)
 
-### The 8 Sponsors: Why We Chose Each One
+### The 9 Sponsors: Why We Chose Each One
 
-Building Anomaly Hunter required integrating 8 different services. Here's why we chose each sponsor, what alternatives we considered, and the specific value they provided.
+Building Anomaly Hunter required integrating 9 different services. Here's why we chose each sponsor, what alternatives we considered, and the specific value they provided.
 
 ---
 
@@ -1744,6 +1744,86 @@ This matches deployment spike pattern. 85% confidence."
 
 ---
 
+#### **9. Weave - LLM Observability**
+
+**What we used:** Token tracking, prompt versioning, evaluation framework
+
+**Why Weave:**
+- **LLM-specific observability**: Fills the gap between infrastructure (TrueFoundry) and application (Sentry) monitoring
+- **Token usage tracking**: See exactly which agent uses the most tokens, identify expensive prompts
+- **Prompt versioning**: A/B test different prompts, track which versions perform best
+- **Evaluation framework**: Systematic testing with automated scoring (accuracy, confidence, latency)
+- **Cost transparency**: Exact API costs per detection, not estimates
+
+**Alternatives considered:**
+- **LangSmith**: Similar features, but requires LangChain (we don't use it)
+- **PromptLayer**: Good for logging, but weak evaluation framework
+- **Helicone**: Focuses on caching/cost optimization, not experimentation
+- **Build custom logging**: Could track tokens manually, but no A/B testing or evaluation
+
+**Value delivered:**
+- **Debugging**: "Detection #23 has low confidence (65%). Why?" -> Weave trace shows Change Detective timed out after 28s, fell back to cached result
+- **Cost optimization**: Root Cause agent was using 3.5K tokens avg (expensive!) -> Reduced prompt, now 1.2K tokens -> 75% cost reduction on that agent
+- **Prompt experimentation**: A/B tested two Pattern Analyst prompts -> v2 had +4% accuracy but +0.3s latency -> chose v1 (speed more important)
+- **Research facilitation**: For Facilitair multi-agent paper, Weave provides statistical evidence: single-agent (77.8% accuracy) vs multi-agent (84.6% accuracy), p=0.003
+
+**What Weave fills:**
+
+```
+Observability Layers:
+├─ Layer 1: Infrastructure (TrueFoundry)
+│  └─ Pod count, CPU, memory, network latency
+├─ Layer 2: Application (Sentry)
+│  └─ Python exceptions, stack traces, user context
+├─ Layer 3: LLM (Weave) <- NEW
+│  └─ Token usage, prompt content, model responses, A/B testing
+└─ Layer 4: Domain Knowledge (Senso)
+   └─ Historical patterns, RAG context
+```
+
+**Why Weave specifically matters for this project:**
+
+LLM observability is critical for Anomaly Hunter because:
+1. **Multi-agent complexity**: 3 agents run in parallel, need to see which one is slow/expensive/inaccurate
+2. **Prompt optimization**: Small prompt changes can have big impacts on confidence and speed
+3. **Research validation**: For Facilitair paper, we need statistically rigorous comparisons (single vs multi-agent)
+4. **Cost control**: With 35+ detections in production, need to track API costs before they balloon
+
+**Real example:**
+
+```
+Problem: Detection #17 took 8.2 seconds (target: <5s)
+
+TrueFoundry shows: CPU at 45%, only 1 replica, no infrastructure bottleneck
+Sentry shows: No errors, no exceptions
+Weave shows:
+  ├─ Pattern Analyst: 1.2s, 1,200 tokens
+  ├─ Change Detective: 1.4s, 1,800 tokens
+  └─ Root Cause: 5.6s, 4,200 tokens <- PROBLEM FOUND
+
+Root Cause Investigation:
+- Weave trace shows prompt includes full conversation history (unnecessary!)
+- Removed history, reduced to 1,200 tokens
+- Latency dropped to 1.8s
+- Total detection time now: 4.4s (under target!)
+```
+
+**Why not build our own:**
+- Building LLM trace visualization: 2-3 weeks
+- Implementing A/B testing framework: 1-2 weeks
+- Evaluation scorers and dataset versioning: 1-2 weeks
+- Weave free tier: 200 traces/month (covers our development usage)
+
+**ROI:** Saved 6+ weeks of engineering time, identified $0.006/detection cost savings (75% reduction on Root Cause agent), enabled research paper with statistical rigor
+
+**Why optional:**
+- Not all users need LLM observability (some just want detections to work)
+- Requires Weights & Biases account (extra signup friction)
+- System works perfectly fine without it (graceful degradation)
+- Made it a showcase of best practices: observability should be optional, not required
+
+---
+
 ### Sponsor Value Summary
 
 | Sponsor | Time Saved | Cost Saved | Key Benefit |
@@ -1756,9 +1836,10 @@ This matches deployment spike pattern. 85% confidence."
 | **ElevenLabs** | 6 months (vs training TTS) | $100K+ | Natural voice alerts for critical anomalies |
 | **Senso** | 4 weeks (vs building RAG) | $0 (free tier) | +15% confidence via historical context |
 | **Airia** | 3 weeks (vs custom ETL) | $0 (free tier) | No-code data pipelines, enterprise connectors |
-| **TOTAL** | **45+ weeks** | **$250K+** | Production-ready in 48 hours |
+| **Weave** | 6 weeks (vs custom LLM observability) | $0 (free tier) | Token tracking, prompt A/B testing, research data |
+| **TOTAL** | **51+ weeks** | **$250K+** | Production-ready in 48 hours |
 
-**Bottom line:** Using sponsors instead of building from scratch saved us **45+ weeks of engineering time** and **$250K+ in development costs**. We shipped a production-ready system in 48 hours that would have taken 10+ months to build solo.
+**Bottom line:** Using sponsors instead of building from scratch saved us **51+ weeks of engineering time** and **$250K+ in development costs**. We shipped a production-ready system in 48 hours that would have taken 11+ months to build solo.
 
 This is why the sponsor ecosystem matters. Not because we couldn't build these components ourselves, but because building them would be a **massive distraction** from solving the core problem (autonomous anomaly detection).
 
@@ -1797,9 +1878,9 @@ We built this in 48 hours. Imagine what a dedicated team could build in 6 months
 
 *Thanks for reading! If you found this useful, give the repo a [STAR] on GitHub and share with your SRE/DevOps friends.*
 
-**Built with:** OpenAI, Anthropic Claude, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia
+**Built with:** OpenAI, Anthropic Claude, StackAI, TrueFoundry, Sentry, Redpanda, ElevenLabs, Senso, Airia, Weave
 
-**Special thanks to:** All 8 sponsor companies for making this possible.
+**Special thanks to:** All 9 sponsor companies for making this possible.
 
 ---
 

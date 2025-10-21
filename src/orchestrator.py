@@ -16,6 +16,14 @@ import numpy as np
 from dotenv import load_dotenv
 load_dotenv()
 
+# LLM Observability (Optional)
+try:
+    import weave
+    WEAVE_AVAILABLE = True
+except ImportError:
+    WEAVE_AVAILABLE = False
+    weave = None
+
 # Active Integrations
 import sentry_sdk
 sentry_sdk.init(
@@ -25,7 +33,28 @@ sentry_sdk.init(
 )
 
 # Autonomous Learning
-from learning.autonomous_learner import AutonomousLearner
+# Try relative import first (for package usage), then absolute (for standalone)
+try:
+    from .learning.autonomous_learner import AutonomousLearner
+except (ImportError, ValueError):
+    # ValueError happens when attempting relative import in non-package
+    from learning.autonomous_learner import AutonomousLearner
+
+
+# Helper decorator factory for optional Weave tracing
+def weave_op_if_available():
+    """
+    Decorator that applies weave.op() if Weave is available and enabled,
+    otherwise returns function unchanged
+    """
+    def decorator(func):
+        if WEAVE_AVAILABLE:
+            try:
+                return weave.op()(func)
+            except Exception:
+                return func
+        return func
+    return decorator
 
 
 @dataclass
@@ -81,14 +110,34 @@ class AnomalyOrchestrator:
         self.stackai = stackai_client
         self.agents = []
         self.learner = AutonomousLearner()  # Autonomous learning engine
+
+        # Initialize Weave (optional)
+        self.weave_enabled = os.getenv("WEAVE_ENABLED", "false").lower() == "true"
+        if self.weave_enabled and WEAVE_AVAILABLE:
+            try:
+                weave_project = os.getenv("WEAVE_PROJECT", "anomaly-hunter")
+                weave.init(weave_project)
+                print(f"[WEAVE] LLM tracing enabled (project: {weave_project})")
+            except Exception as e:
+                print(f"[WEAVE] Failed to initialize: {e}")
+                self.weave_enabled = False
+        elif self.weave_enabled and not WEAVE_AVAILABLE:
+            print("[WEAVE] Enabled but package not installed. Run: pip install weave")
+            self.weave_enabled = False
+
         self._load_agents()
 
     def _load_agents(self):
         """Lazy load agents to avoid import issues"""
         try:
-            from agents.pattern_analyst import PatternAnalyst
-            from agents.change_detective import ChangeDetective
-            from agents.root_cause_agent import RootCauseAgent
+            try:
+                from .agents.pattern_analyst import PatternAnalyst
+                from .agents.change_detective import ChangeDetective
+                from .agents.root_cause_agent import RootCauseAgent
+            except ImportError:
+                from agents.pattern_analyst import PatternAnalyst
+                from agents.change_detective import ChangeDetective
+                from agents.root_cause_agent import RootCauseAgent
 
             self.agents = [
                 PatternAnalyst(self.stackai),
@@ -100,6 +149,7 @@ class AnomalyOrchestrator:
             print(f"[WARN] Could not load agents: {e}")
             print("[INFO] Agents will be loaded when first needed")
 
+    @weave_op_if_available()
     async def investigate(
         self,
         context: AnomalyContext,
@@ -108,13 +158,27 @@ class AnomalyOrchestrator:
         """
         Run full anomaly investigation with all 3 agents
 
+        Weave Integration:
+        - Automatically logs inputs (data, timestamps, metadata)
+        - Tracks outputs (verdict, confidence, severity)
+        - Measures latency per detection
+        - Traces nested agent calls
+
         Args:
-            context: Anomaly detection context
+            context: Anomaly detection context (AnomalyContext object or dict)
             senso_context: Optional context from Senso knowledge base
 
         Returns:
             AnomalyVerdict with synthesized findings
         """
+        # Handle both dict and AnomalyContext inputs for backward compatibility
+        if isinstance(context, dict):
+            context = AnomalyContext(
+                data=context.get("data"),
+                timestamps=context.get("timestamps"),
+                metadata=context.get("metadata")
+            )
+
         print(f"\n[ORCHESTRATOR] Starting investigation of {len(context.data)} data points")
 
         # Step 1: Run all agents in parallel
