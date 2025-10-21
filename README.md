@@ -3,8 +3,8 @@
 **Multi-agent anomaly detection with real-time investigation**
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![8 Sponsors](https://img.shields.io/badge/sponsors-8-green.svg)](#sponsors)
-[![30+ Detections](https://img.shields.io/badge/detections-30+-orange.svg)](#autonomous-learning)
+[![9 Sponsors](https://img.shields.io/badge/sponsors-9-green.svg)](#sponsors)
+[![40+ Detections](https://img.shields.io/badge/detections-40+-orange.svg)](#autonomous-learning)
 [![Built with Corch](https://img.shields.io/badge/built%20with-Corch-orange.svg)](https://github.com/bledden/weavehacks-collaborative)
 
 Built for **Production Readiness** - October 2025
@@ -24,13 +24,13 @@ Anomaly Hunter autonomously detects and investigates data anomalies using 3 spec
 ### [✓] Validated Performance
 - [✓] **100% Recall** on obvious anomalies (Easy/Medium difficulty)
 - [✓] **64% Average Confidence** across all agents
-- [✓] **30+ Detections** processed through autonomous learning
-- [✓] **8/8 Sponsor integrations** fully operational
+- [✓] **40+ Detections** processed through autonomous learning
+- [✓] **9/9 Sponsor integrations** fully operational
 
-**Agent Performance (30 detections tracked):**
-- Pattern Analyst: 78.3% avg confidence
-- Change Detective: 78.7% avg confidence
-- Root Cause Agent: 83.2% avg confidence
+**Agent Performance (40 detections tracked):**
+- Pattern Analyst: 74.9% avg confidence
+- Change Detective: 77.3% avg confidence
+- Root Cause Agent: 65.3% avg confidence
 
 See [test_efficacy.py](test_efficacy.py) and [test_realistic_datasets.py](test_realistic_datasets.py) for testing framework.
 
@@ -81,21 +81,22 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 - **Confidence-Weighted Analysis**: Know exactly how certain the system is (64% avg confidence)
 
 #### **3. Autonomous Learning** [ADAPTIVE]
-- **35+ Detections Tracked**: Continuously learns from every investigation
+- **40+ Detections Tracked**: Continuously learns from every investigation
 - **Dual Self-Improvement Systems**:
   - **Autonomous Learner**: Adapts agent weights based on historical performance
   - **Senso RAG**: Builds organizational knowledge from past incidents
 - **Getting Smarter**: Agent performance improves with each detection
+- **Weave Integration**: LLM observability tracks token usage, prompt effectiveness, and confidence trends
 
-**Current Agent Performance (35 detections):**
+**Current Agent Performance (40 detections):**
 | Agent | Avg Confidence | Detections |
 |-------|---------------|------------|
-| Pattern Analyst | 78.3% | 30 |
-| Change Detective | 82.2% | 35 |
-| Root Cause Agent | 76.9% | 35 |
+| Pattern Analyst | 74.9% | 40 |
+| Change Detective | 77.3% | 40 |
+| Root Cause Agent | 65.3% | 40 |
 
 #### **4. Production-Ready Architecture** [BUILT]
-- **8/8 Sponsors Fully Operational**: Not a demo - production integrations
+- **9/9 Sponsors Fully Operational**: Not a demo - production integrations
 - **Multi-Model AI Routing**: GPT-4o-mini for speed, Claude Sonnet 4.5 for depth
 - **Real-Time Streaming**: Kafka-compatible event broker (Redpanda)
 - **Production Monitoring**: Sentry error tracking + TrueFoundry ML metrics
@@ -152,7 +153,7 @@ Traditional monitoring tells you **WHAT** broke. Anomaly Hunter tells you **WHY*
 Anomaly Hunter tracks comprehensive telemetry for continuous improvement:
 
 [✓] **Detection Metrics**
-- Total detections processed: 35+
+- Total detections processed: 40+
 - Precision, recall, F1 scores per pattern type
 - False positive/negative rates
 
@@ -542,7 +543,7 @@ See [demo/demo_script.md](demo/demo_script.md) for the 2-3 minute presentation f
 6. ElevenLabs voice alert plays
 
 **Closing Line:**
-"8 sponsors, each doing what it does best. Built on proven Corch orchestration with 73% quality pass rate. Autonomous, real-time, production-ready."
+"9 sponsors, each doing what it does best. Built on proven Corch orchestration with full LLM observability via Weave. Autonomous, real-time, production-ready."
 
 ---
 
@@ -672,4 +673,4 @@ Built by **Blake Ledden**
 ---
 
 **Built for Production - October 2025**
-**System: Production-Ready | Sponsors: 8 | Agents: 3 | Lines of Code: 3000+**
+**System: Production-Ready | Sponsors: 9 | Agents: 3 | Detections: 40+ | Lines of Code: 3000+**
