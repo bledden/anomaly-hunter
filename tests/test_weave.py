@@ -4,7 +4,8 @@ Quick test script for Weave integration
 """
 
 import sys
-sys.path.insert(0, 'src')
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 import asyncio
 import numpy as np
