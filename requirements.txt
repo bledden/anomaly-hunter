@@ -1,29 +1,78 @@
-# Core dependencies
-weave>=0.50.0
-python-dotenv>=1.0.0
-pyyaml>=6.0
+# ============================================
+# CORE DEPENDENCIES (Required)
+# ============================================
+
+# Data processing
 numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
 
-# LLM providers
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# LLM Observability
+weave>=0.50.0
+
+# ============================================
+# SPONSOR INTEGRATIONS (9 total)
+# ============================================
+
+# 1. OpenAI - Core LLM provider
 openai>=1.35.0
-anthropic>=0.30.0
-google-generativeai>=0.5.0
 
-# UI and visualization
+# 2. StackAI - Multi-model gateway (uses requests)
+requests>=2.31.0
+
+# 3. TrueFoundry - ML platform (uses requests)
+# Included via requests
+
+# 4. Sentry - Error monitoring
+sentry-sdk>=2.0.0
+
+# 5. Redpanda - Event streaming (Kafka-compatible)
+kafka-python>=2.0.2
+
+# 6. ElevenLabs - Voice synthesis (uses requests)
+# Included via requests
+
+# 7. Airia - Workflow orchestration (uses requests)
+# Included via requests
+
+# 8. Senso - RAG knowledge base (uses requests)
+# Included via requests
+
+# 9. Weave - Already included above
+
+# ============================================
+# OPTIONAL LLM PROVIDERS
+# ============================================
+
+# Anthropic - Direct Claude access (fallback for StackAI)
+anthropic>=0.30.0
+
+# ============================================
+# CLI & UI
+# ============================================
+
 rich>=13.7.0
 click>=8.1.0
 
-# Async support
+# ============================================
+# ASYNC SUPPORT
+# ============================================
+
 aiohttp>=3.9.0
 httpx>=0.25.0
-asyncio-throttle>=1.0.2
 
-# Testing
+# ============================================
+# TESTING (Optional)
+# ============================================
+
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
 
-# Optional performance
-orjson>=3.9.0  # Faster JSON parsing
+# ============================================
+# PERFORMANCE OPTIMIZATION (Optional)
+# ============================================
 
-# Enhanced Evaluation Tools
--r requirements-evaluation.txt
+orjson>=3.9.0  # Faster JSON parsing
