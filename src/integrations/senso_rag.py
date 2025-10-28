@@ -6,6 +6,7 @@ Retrieve historical anomaly patterns and context
 import os
 import requests
 from typing import Optional, Dict, Any
+import sentry_sdk
 
 
 class SensoRAG:
@@ -33,6 +34,7 @@ class SensoRAG:
         print("[SENSO] ✅ RAG knowledge base initialized")
         print(f"[SENSO]   └─ API endpoint: {self.base_url}")
 
+    @sentry_sdk.trace
     def retrieve_context(self, anomaly_description: str, top_k: int = 3) -> Optional[str]:
         """
         Retrieve historical context for similar anomalies
@@ -48,57 +50,81 @@ class SensoRAG:
         if not self.enabled:
             return None
 
-        try:
-            # Query Senso search endpoint (correct API structure)
-            headers = {
-                "X-API-Key": self.api_key,  # Senso uses X-API-Key, not Bearer token
-                "Content-Type": "application/json"
-            }
+        with sentry_sdk.start_span(
+            op="ai.tool.call",
+            description="Senso RAG - Historical Context Retrieval"
+        ) as span:
+            span.set_data("tool", "senso_rag")
+            span.set_data("query", anomaly_description[:100])  # Truncate for privacy
+            span.set_data("top_k", top_k)
 
-            payload = {
-                "query": anomaly_description,
-                "limit": top_k,
-                "org_id": self.org_id
-            }
+            try:
+                # Query Senso search endpoint (correct API structure)
+                headers = {
+                    "X-API-Key": self.api_key,  # Senso uses X-API-Key, not Bearer token
+                    "Content-Type": "application/json"
+                }
 
-            # Use correct Senso search endpoint
-            response = requests.post(
-                f"{self.base_url}/search",
-                json=payload,
-                headers=headers,
-                timeout=10
-            )
+                payload = {
+                    "query": anomaly_description,
+                    "limit": top_k,
+                    "org_id": self.org_id
+                }
 
-            print(f"[SENSO] 🔍 Querying RAG for similar anomalies...")
+                # Use correct Senso search endpoint
+                with sentry_sdk.start_span(
+                    op="http.client",
+                    description="POST /search to Senso API"
+                ) as http_span:
+                    http_span.set_data("url", f"{self.base_url}/search")
+                    http_span.set_data("method", "POST")
 
-            if response.status_code == 200:
-                data = response.json()
+                    response = requests.post(
+                        f"{self.base_url}/search",
+                        json=payload,
+                        headers=headers,
+                        timeout=10
+                    )
 
-                # Extract relevant context from results
-                context_parts = []
-                results = data.get("results", [])
+                    http_span.set_data("status_code", response.status_code)
 
-                for i, result in enumerate(results[:top_k], 1):
-                    text = result.get("text", "")
-                    score = result.get("score", 0.0)
-                    context_parts.append(f"[Match {i}, confidence {score:.2f}]: {text[:200]}")
+                print(f"[SENSO] 🔍 Querying RAG for similar anomalies...")
 
-                if context_parts:
-                    context = "Historical patterns:\n" + "\n".join(context_parts)
-                    print(f"[SENSO] 📚 Retrieved {len(context_parts)} similar historical cases")
-                    print(f"[SENSO]   └─ Action: Provided RAG context from knowledge base")
-                    return context
+                if response.status_code == 200:
+                    data = response.json()
+
+                    # Extract relevant context from results
+                    context_parts = []
+                    results = data.get("results", [])
+
+                    span.set_data("results_count", len(results))
+
+                    for i, result in enumerate(results[:top_k], 1):
+                        text = result.get("text", "")
+                        score = result.get("score", 0.0)
+                        context_parts.append(f"[Match {i}, confidence {score:.2f}]: {text[:200]}")
+
+                    if context_parts:
+                        context = "Historical patterns:\n" + "\n".join(context_parts)
+                        span.set_data("context_retrieved", True)
+                        span.set_data("matches_found", len(context_parts))
+                        print(f"[SENSO] 📚 Retrieved {len(context_parts)} similar historical cases")
+                        print(f"[SENSO]   └─ Action: Provided RAG context from knowledge base")
+                        return context
+                    else:
+                        span.set_data("context_retrieved", False)
+                        print(f"[SENSO] ℹ️  No matching historical patterns found (new anomaly type)")
+                        return None
+
                 else:
-                    print(f"[SENSO] ℹ️  No matching historical patterns found (new anomaly type)")
+                    span.set_data("error", f"HTTP {response.status_code}")
+                    print(f"[SENSO] ⚠️  API returned status {response.status_code}")
                     return None
 
-            else:
-                print(f"[SENSO] ⚠️  API returned status {response.status_code}")
+            except Exception as e:
+                span.set_data("error", str(e))
+                print(f"[WARN] Senso RAG query failed: {e}")
                 return None
-
-        except Exception as e:
-            print(f"[WARN] Senso RAG query failed: {e}")
-            return None
 
     def store_anomaly(self, verdict: Any) -> bool:
         """

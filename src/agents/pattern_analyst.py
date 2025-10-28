@@ -6,6 +6,7 @@ Role: Statistical anomaly detection using GPT-4
 import numpy as np
 from typing import Dict, Any, Optional
 from scipy import stats
+import sentry_sdk
 
 # Import Weave decorator from orchestrator
 import sys
@@ -38,6 +39,7 @@ class PatternAnalyst:
         self.name = "pattern_analyst"
 
     @weave_op_if_available()
+    @sentry_sdk.trace
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze data for statistical anomalies
@@ -48,35 +50,62 @@ class PatternAnalyst:
         Returns:
             Finding dict with agent_name, finding, confidence, severity, evidence
         """
+        with sentry_sdk.start_span(
+            op="ai.agent.analyze",
+            description="Pattern Analyst - Statistical Analysis"
+        ) as agent_span:
+            agent_span.set_data("agent", "pattern_analyst")
+            agent_span.set_data("model", self.model)
 
-        data = context.get("data")
-        if data is None:
-            return self._error_result("No data provided")
+            data = context.get("data")
+            if data is None:
+                return self._error_result("No data provided")
 
-        # Statistical analysis
-        stats_result = self._statistical_analysis(data)
+            agent_span.set_data("data_points", len(data))
 
-        # Build prompt for LLM
-        prompt = self._build_prompt(stats_result, context)
+            # Statistical analysis
+            with sentry_sdk.start_span(
+                op="statistics",
+                description="Z-score and baseline analysis"
+            ) as stats_span:
+                stats_result = self._statistical_analysis(data)
+                stats_span.set_data("anomalies_found", stats_result["anomaly_count"])
+                stats_span.set_data("mean", stats_result["mean"])
+                stats_span.set_data("std", stats_result["std"])
 
-        # Get LLM analysis (if StackAI available)
-        llm_analysis = await self._get_llm_analysis(prompt)
+            # Build prompt for LLM
+            prompt = self._build_prompt(stats_result, context)
 
-        # Extract severity and confidence
-        severity = self._extract_severity(llm_analysis)
-        confidence = self._calculate_confidence(stats_result)
+            # Get LLM analysis (if StackAI available)
+            with sentry_sdk.start_span(
+                op="ai.llm.call",
+                description=f"LLM analysis via {self.model}"
+            ) as llm_span:
+                llm_span.set_data("model", self.model)
+                llm_span.set_data("prompt_length", len(prompt))
 
-        return {
-            "agent_name": self.name,
-            "finding": self._format_finding(stats_result, llm_analysis),
-            "confidence": confidence,
-            "severity": severity,
-            "evidence": {
-                "anomaly_indices": stats_result["anomaly_indices"],
-                "z_scores": stats_result["max_z_scores"],
-                "statistical_summary": stats_result["summary"]
+                llm_analysis = await self._get_llm_analysis(prompt)
+
+                llm_span.set_data("response_length", len(llm_analysis))
+
+            # Extract severity and confidence
+            severity = self._extract_severity(llm_analysis)
+            confidence = self._calculate_confidence(stats_result)
+
+            agent_span.set_data("severity", severity)
+            agent_span.set_data("confidence", confidence)
+
+            return {
+                "agent_name": self.name,
+                "finding": self._format_finding(stats_result, llm_analysis),
+                "confidence": confidence,
+                "severity": severity,
+                "evidence": {
+                    "anomaly_indices": stats_result["anomaly_indices"],
+                    "z_scores": stats_result["max_z_scores"],
+                    "statistical_summary": stats_result["summary"]
+                }
             }
-        }
 
     def _statistical_analysis(self, data: np.ndarray) -> Dict[str, Any]:
         """Perform statistical anomaly detection"""

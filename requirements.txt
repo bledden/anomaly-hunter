@@ -26,8 +26,8 @@ requests>=2.31.0
 # 3. TrueFoundry - ML platform (uses requests)
 # Included via requests
 
-# 4. Sentry - Error monitoring
-sentry-sdk>=2.0.0
+# 4. Sentry - Error monitoring + AI Agent tracing
+sentry-sdk[openai]>=2.0.0  # Includes OpenAI integration for LLM monitoring
 
 # 5. Redpanda - Event streaming (Kafka-compatible)
 kafka-python>=2.0.2

@@ -5,6 +5,7 @@ Role: Hypothesis generation and root cause analysis using o1-mini
 
 import numpy as np
 from typing import Dict, Any, Optional, List
+import sentry_sdk
 
 # Import Weave decorator from orchestrator
 import sys
@@ -37,6 +38,7 @@ class RootCauseAgent:
         self.name = "root_cause"
 
     @weave_op_if_available()
+    @sentry_sdk.trace
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze root cause of anomalies
@@ -47,35 +49,68 @@ class RootCauseAgent:
         Returns:
             Finding dict with agent_name, finding, confidence, severity, evidence
         """
+        with sentry_sdk.start_span(
+            op="ai.agent.analyze",
+            description="Root Cause Agent - Hypothesis Generation"
+        ) as agent_span:
+            agent_span.set_data("agent", "root_cause")
+            agent_span.set_data("model", self.model)
 
-        data = context.get("data")
-        if data is None:
-            return self._error_result("No data provided")
+            data = context.get("data")
+            if data is None:
+                return self._error_result("No data provided")
 
-        # Root cause analysis
-        rc_result = self._root_cause_analysis(data, context)
+            agent_span.set_data("data_points", len(data))
 
-        # Build prompt for LLM
-        prompt = self._build_prompt(rc_result, context)
+            # Check for Senso context
+            senso_context = context.get("senso_context")
+            if senso_context:
+                agent_span.set_data("has_historical_context", True)
 
-        # Get LLM analysis
-        llm_analysis = await self._get_llm_analysis(prompt)
+            # Root cause analysis
+            with sentry_sdk.start_span(
+                op="root_cause.analysis",
+                description="Anomaly clustering and correlation"
+            ) as rc_span:
+                rc_result = self._root_cause_analysis(data, context)
+                rc_span.set_data("anomaly_clusters", len(rc_result["anomaly_clusters"]))
+                rc_span.set_data("hypotheses_generated", len(rc_result["hypotheses"]))
+                rc_span.set_data("correlation_strength", rc_result["correlation_strength"])
 
-        # Extract severity and confidence
-        severity = self._extract_severity(llm_analysis)
-        confidence = self._calculate_confidence(rc_result, llm_analysis)
+            # Build prompt for LLM
+            prompt = self._build_prompt(rc_result, context)
 
-        return {
-            "agent_name": self.name,
-            "finding": self._format_finding(rc_result, llm_analysis),
-            "confidence": confidence,
-            "severity": severity,
-            "evidence": {
-                "anomaly_indices": rc_result["anomaly_clusters"],
-                "hypotheses": rc_result["hypotheses"],
-                "correlation_strength": rc_result["correlation_strength"]
+            # Get LLM analysis
+            with sentry_sdk.start_span(
+                op="ai.llm.call",
+                description=f"LLM hypothesis reasoning via {self.model}"
+            ) as llm_span:
+                llm_span.set_data("model", self.model)
+                llm_span.set_data("prompt_length", len(prompt))
+                llm_span.set_data("has_senso_context", bool(senso_context))
+
+                llm_analysis = await self._get_llm_analysis(prompt)
+
+                llm_span.set_data("response_length", len(llm_analysis))
+
+            # Extract severity and confidence
+            severity = self._extract_severity(llm_analysis)
+            confidence = self._calculate_confidence(rc_result, llm_analysis)
+
+            agent_span.set_data("severity", severity)
+            agent_span.set_data("confidence", confidence)
+
+            return {
+                "agent_name": self.name,
+                "finding": self._format_finding(rc_result, llm_analysis),
+                "confidence": confidence,
+                "severity": severity,
+                "evidence": {
+                    "anomaly_indices": rc_result["anomaly_clusters"],
+                    "hypotheses": rc_result["hypotheses"],
+                    "correlation_strength": rc_result["correlation_strength"]
+                }
             }
-        }
 
     def _root_cause_analysis(self, data: np.ndarray, context: Dict[str, Any]) -> Dict[str, Any]:
         """Perform root cause analysis"""

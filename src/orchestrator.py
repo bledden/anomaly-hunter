@@ -26,11 +26,25 @@ except ImportError:
 
 # Active Integrations
 import sentry_sdk
+from sentry_sdk.integrations.openai import OpenAIIntegration
+
+# Initialize Sentry with AI Agent monitoring
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
+    send_default_pii=False,  # Don't send user data by default
+    integrations=[
+        OpenAIIntegration(
+            include_prompts=True,  # Track prompts for debugging
+            tiktoken_encoding_name="cl100k_base"  # For token counting
+        )
+    ],
+    _experiments={
+        "continuous_profiling_auto_start": True,
+    }
 )
+print("[SENTRY] AI Agent monitoring initialized")
 
 # Autonomous Learning
 # Try relative import first (for package usage), then absolute (for standalone)
@@ -150,6 +164,7 @@ class AnomalyOrchestrator:
             print("[INFO] Agents will be loaded when first needed")
 
     @weave_op_if_available()
+    @sentry_sdk.trace
     async def investigate(
         self,
         context: AnomalyContext,
@@ -158,11 +173,9 @@ class AnomalyOrchestrator:
         """
         Run full anomaly investigation with all 3 agents
 
-        Weave Integration:
-        - Automatically logs inputs (data, timestamps, metadata)
-        - Tracks outputs (verdict, confidence, severity)
-        - Measures latency per detection
-        - Traces nested agent calls
+        Observability:
+        - Weave: Logs inputs, outputs, latency, nested agent calls
+        - Sentry: AI agent tracing with full workflow visibility
 
         Args:
             context: Anomaly detection context (AnomalyContext object or dict)
@@ -171,49 +184,95 @@ class AnomalyOrchestrator:
         Returns:
             AnomalyVerdict with synthesized findings
         """
-        # Handle both dict and AnomalyContext inputs for backward compatibility
-        if isinstance(context, dict):
-            context = AnomalyContext(
-                data=context.get("data"),
-                timestamps=context.get("timestamps"),
-                metadata=context.get("metadata")
-            )
+        # Start Sentry transaction for complete workflow tracing
+        with sentry_sdk.start_transaction(
+            op="ai.agent.workflow",
+            name="Anomaly Investigation",
+            description="3-agent parallel anomaly detection"
+        ) as transaction:
 
-        print(f"\n[ORCHESTRATOR] Starting investigation of {len(context.data)} data points")
+            # Handle both dict and AnomalyContext inputs for backward compatibility
+            if isinstance(context, dict):
+                context = AnomalyContext(
+                    data=context.get("data"),
+                    timestamps=context.get("timestamps"),
+                    metadata=context.get("metadata")
+                )
 
-        # Step 1: Run all agents in parallel
-        print("[STEP 1/3] Running agents in parallel...")
-        findings = await self._run_agents_parallel(context, senso_context)
+            # Add detection metadata to Sentry
+            transaction.set_data("data_points", len(context.data))
+            if context.metadata:
+                transaction.set_data("metadata", context.metadata)
 
-        # Step 2: Synthesize findings
-        print("[STEP 2/3] Synthesizing findings...")
-        verdict = self._synthesize_findings(findings, context)
+            print(f"\n[ORCHESTRATOR] Starting investigation of {len(context.data)} data points")
 
-        # Step 3: Generate recommendation
-        print("[STEP 3/3] Generating recommendation...")
-        verdict.recommendation = self._generate_recommendation(verdict)
+            # Step 1: Run all agents in parallel
+            with sentry_sdk.start_span(
+                op="ai.agent.orchestrate",
+                description="Parallel execution of 3 specialized agents"
+            ) as agent_span:
+                agent_span.set_data("agent_count", 3)
+                agent_span.set_data("execution_mode", "parallel")
 
-        # Step 4: AUTONOMOUS LEARNING - Learn from this detection
-        print("[STEP 4/4] Learning from detection...")
-        self.learner.learn_from_outcome(verdict, was_correct=None)  # Will improve with feedback
+                print("[STEP 1/3] Running agents in parallel...")
+                findings = await self._run_agents_parallel(context, senso_context)
 
-        # Step 5: Log to Sentry for production monitoring
-        try:
-            sentry_sdk.capture_message(
-                f"Anomaly detected: Severity {verdict.severity}/10",
-                level="warning" if verdict.severity >= 7 else "info"
-            )
-            sentry_sdk.set_context("detection", {
-                "severity": verdict.severity,
-                "confidence": verdict.confidence,
-                "anomaly_count": len(verdict.anomalies_detected)
-            })
-            print("[SENTRY] ✅ Logged to production monitoring")
-        except:
-            pass  # Don't fail if Sentry unavailable
+                agent_span.set_data("findings_count", len(findings))
 
-        print(f"[ORCHESTRATOR] Investigation complete. Severity: {verdict.severity}/10")
-        return verdict
+            # Step 2: Synthesize findings
+            with sentry_sdk.start_span(
+                op="ai.synthesis",
+                description="Confidence-weighted voting synthesis"
+            ) as synthesis_span:
+                print("[STEP 2/3] Synthesizing findings...")
+                verdict = self._synthesize_findings(findings, context)
+
+                synthesis_span.set_data("severity", verdict.severity)
+                synthesis_span.set_data("confidence", verdict.confidence)
+                synthesis_span.set_data("anomalies_detected", len(verdict.anomalies_detected))
+
+            # Step 3: Generate recommendation
+            with sentry_sdk.start_span(
+                op="recommendation",
+                description="Generate actionable recommendation"
+            ) as rec_span:
+                print("[STEP 3/3] Generating recommendation...")
+                verdict.recommendation = self._generate_recommendation(verdict)
+                rec_span.set_data("severity_level",
+                    "CRITICAL" if verdict.severity >= 9 else
+                    "HIGH" if verdict.severity >= 7 else
+                    "MEDIUM" if verdict.severity >= 5 else "LOW"
+                )
+
+            # Step 4: AUTONOMOUS LEARNING - Learn from this detection
+            with sentry_sdk.start_span(
+                op="learning",
+                description="Autonomous learning update"
+            ) as learning_span:
+                print("[STEP 4/4] Learning from detection...")
+                self.learner.learn_from_outcome(verdict, was_correct=None)
+                learning_span.set_data("total_detections",
+                    self.learner.agent_stats.get("total_detections", 0))
+
+            # Step 5: Log to Sentry for production monitoring
+            try:
+                sentry_sdk.capture_message(
+                    f"Anomaly detected: Severity {verdict.severity}/10",
+                    level="warning" if verdict.severity >= 7 else "info"
+                )
+                sentry_sdk.set_context("detection", {
+                    "severity": verdict.severity,
+                    "confidence": verdict.confidence,
+                    "anomaly_count": len(verdict.anomalies_detected),
+                    "agent_findings": len(findings)
+                })
+                print("[SENTRY] ✅ Logged to AI monitoring + production monitoring")
+            except Exception as e:
+                print(f"[SENTRY] Warning: Failed to log - {e}")
+                pass  # Don't fail if Sentry unavailable
+
+            print(f"[ORCHESTRATOR] Investigation complete. Severity: {verdict.severity}/10")
+            return verdict
 
     async def _run_agents_parallel(
         self,

@@ -282,6 +282,47 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 [VOICE] "Attention: Critical anomaly detected..."
 ```
 
+### Sentry AI Monitoring - Example Trace
+
+```
+Anomaly Investigation (ai.agent.workflow) [2.3s]
+├─ Parallel execution of 3 specialized agents (ai.agent.orchestrate) [0.8s]
+│  ├─ Pattern Analyst - Statistical Analysis (ai.agent.analyze) [0.8s]
+│  │  ├─ Z-score and baseline analysis (statistics) [15ms]
+│  │  └─ LLM analysis via openai/gpt-5-pro (ai.llm.call) [785ms]
+│  │     • Prompt: 1,247 tokens
+│  │     • Response: 342 tokens
+│  │     • Severity: 9/10, Confidence: 0.90
+│  ├─ Change Detective - Drift Analysis (ai.agent.analyze) [0.7s]
+│  │  ├─ Changepoint and drift detection (timeseries.analysis) [12ms]
+│  │  └─ LLM analysis via anthropic/claude-sonnet-4-5 (ai.llm.call) [688ms]
+│  │     • Prompt: 1,103 tokens
+│  │     • Response: 298 tokens
+│  │     • Severity: 10/10, Confidence: 1.00
+│  └─ Root Cause Agent - Hypothesis Generation (ai.agent.analyze) [0.8s]
+│     ├─ Senso RAG - Historical Context Retrieval (ai.tool.call) [120ms]
+│     │  • Query: "database connection spike"
+│     │  • Matches found: 3
+│     ├─ Anomaly clustering and correlation (root_cause.analysis) [18ms]
+│     └─ LLM hypothesis reasoning via claude-4.5 (ai.llm.call) [662ms]
+│        • Prompt: 1,521 tokens (includes Senso context)
+│        • Response: 415 tokens
+│        • Severity: 7/10, Confidence: 0.70
+├─ Confidence-weighted voting synthesis (ai.synthesis) [5ms]
+│  • Weighted severity: 8.9 → 9
+│  • Avg confidence: 0.87
+├─ Generate actionable recommendation (recommendation) [2ms]
+│  • Level: CRITICAL
+└─ Autonomous learning update (learning) [10ms]
+   • Total detections: 63
+```
+
+**Benefits:**
+- Identify which agent is underperforming (latency, confidence)
+- Detect silent failures (Pattern Analyst timeout, Senso RAG error)
+- Optimize prompt length (1,521 tokens too high? Trim context)
+- Track token usage per detection for cost optimization
+
 ---
 
 ## [TECH] Tech Stack
@@ -301,9 +342,18 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 - **Senso** - Knowledge base (RAG for anomaly patterns)
 - **Redpanda** - Real-time event streaming (Kafka-compatible)
 
-### Monitoring & Alerts
-- **Sentry** - Application monitoring & custom metrics
+### Observability & Monitoring
+- **Sentry AI Monitoring** - Complete AI agent workflow tracing with LLM observability
+- **Weave** - LLM call tracking, token usage, prompt versioning
 - **ElevenLabs** - Voice synthesis for critical alerts
+
+**Sentry AI Monitoring Features:**
+- Full agent workflow visualization (orchestrator → 3 agents → synthesis → learning)
+- Automatic OpenAI LLM call instrumentation
+- Tool call tracking (Senso RAG, StackAI gateway)
+- Per-agent performance metrics (latency, confidence, severity)
+- Error detection and silent failure alerts
+- Production-ready traces with complete debugging context
 
 ---
 
@@ -317,7 +367,7 @@ See [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md) for detailed step-by-step architecture.
 | [TrueFoundry](https://truefoundry.com) | ML Platform | Deployment, auto-scaling, monitoring |
 | [OpenAI](https://openai.com) | Core Models | GPT-4, o1-mini |
 | [Redpanda](https://redpanda.com) | Event Streaming | Real-time anomaly events |
-| [Sentry](https://sentry.io) | App Monitoring | Error tracking, custom metrics |
+| [Sentry](https://sentry.io) | AI Agent Monitoring | Complete workflow tracing, LLM observability, tool call tracking |
 | [ElevenLabs](https://elevenlabs.io) | Voice Synthesis | Audio alerts |
 | [Weave](https://wandb.ai/site/weave) | LLM Observability | Token tracking, prompt versioning, evaluations |
 

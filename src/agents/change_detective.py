@@ -5,6 +5,7 @@ Role: Time-series drift analysis using Claude
 
 import numpy as np
 from typing import Dict, Any, Optional, List
+import sentry_sdk
 
 # Import Weave decorator from orchestrator
 import sys
@@ -37,6 +38,7 @@ class ChangeDetective:
         self.name = "change_detective"
 
     @weave_op_if_available()
+    @sentry_sdk.trace
     async def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze data for time-series changes
@@ -47,35 +49,62 @@ class ChangeDetective:
         Returns:
             Finding dict with agent_name, finding, confidence, severity, evidence
         """
+        with sentry_sdk.start_span(
+            op="ai.agent.analyze",
+            description="Change Detective - Drift Analysis"
+        ) as agent_span:
+            agent_span.set_data("agent", "change_detective")
+            agent_span.set_data("model", self.model)
 
-        data = context.get("data")
-        if data is None:
-            return self._error_result("No data provided")
+            data = context.get("data")
+            if data is None:
+                return self._error_result("No data provided")
 
-        # Time-series analysis
-        change_result = self._change_point_analysis(data)
+            agent_span.set_data("data_points", len(data))
 
-        # Build prompt for LLM
-        prompt = self._build_prompt(change_result, context)
+            # Time-series analysis
+            with sentry_sdk.start_span(
+                op="timeseries.analysis",
+                description="Changepoint and drift detection"
+            ) as change_span:
+                change_result = self._change_point_analysis(data)
+                change_span.set_data("change_points", len(change_result["change_points"]))
+                change_span.set_data("drift_detected", change_result["drift_detected"])
+                change_span.set_data("trend", change_result["trend"])
 
-        # Get LLM analysis
-        llm_analysis = await self._get_llm_analysis(prompt)
+            # Build prompt for LLM
+            prompt = self._build_prompt(change_result, context)
 
-        # Extract severity and confidence
-        severity = self._extract_severity(llm_analysis)
-        confidence = self._calculate_confidence(change_result)
+            # Get LLM analysis
+            with sentry_sdk.start_span(
+                op="ai.llm.call",
+                description=f"LLM analysis via {self.model}"
+            ) as llm_span:
+                llm_span.set_data("model", self.model)
+                llm_span.set_data("prompt_length", len(prompt))
 
-        return {
-            "agent_name": self.name,
-            "finding": self._format_finding(change_result, llm_analysis),
-            "confidence": confidence,
-            "severity": severity,
-            "evidence": {
-                "anomaly_indices": change_result["change_points"],
-                "drift_detected": change_result["drift_detected"],
-                "trend": change_result["trend"]
+                llm_analysis = await self._get_llm_analysis(prompt)
+
+                llm_span.set_data("response_length", len(llm_analysis))
+
+            # Extract severity and confidence
+            severity = self._extract_severity(llm_analysis)
+            confidence = self._calculate_confidence(change_result)
+
+            agent_span.set_data("severity", severity)
+            agent_span.set_data("confidence", confidence)
+
+            return {
+                "agent_name": self.name,
+                "finding": self._format_finding(change_result, llm_analysis),
+                "confidence": confidence,
+                "severity": severity,
+                "evidence": {
+                    "anomaly_indices": change_result["change_points"],
+                    "drift_detected": change_result["drift_detected"],
+                    "trend": change_result["trend"]
+                }
             }
-        }
 
     def _change_point_analysis(self, data: np.ndarray) -> Dict[str, Any]:
         """Detect change points in time series"""
